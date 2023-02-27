@@ -1,0 +1,4 @@
+rabbitmq:
+  queue_name:  tg_bot
+  exchange_name: bot_exchange
+  rabbit_url: amqp://rmuser:rmpassword@localhost:5672/

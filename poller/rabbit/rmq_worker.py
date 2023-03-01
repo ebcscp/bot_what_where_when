@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-import asyncio
 from aio_pika import connect, Message
-import aio_pika
 import json
 
 @dataclass

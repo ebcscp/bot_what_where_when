@@ -1,8 +1,8 @@
 bot:
   api_path: https://api.telegram.org/bot
-  token:
+  token: 
   id:
 rabbitmq:
   queue_name:  tg_bot
   exchange_name: bot_exchange
-  rabbit_url: amqp://rmuser:rmpassword@localhost:5672/
+  rabbit_url: amqp://tg_user:tg_password@rabbitmq:5672/

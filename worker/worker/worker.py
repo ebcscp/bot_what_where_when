@@ -5,6 +5,9 @@ from worker.models import UpdateObj
 import aio_pika
 import json
 import yaml
+from worker.tg_api import TgClient
+
+
 
 @dataclass
 class WorkerConfig:
@@ -20,11 +23,13 @@ class Worker:
         self.consume_q = None
         self.count_worker = 0
         self.stop_event = asyncio.Event()
+        self.tg_client = TgClient()
         self.queue = None
 
     async def handler(self, msg: aio_pika.IncomingMessage):
 
         upd = UpdateObj.Schema().loads(msg.body)
+        await self.tg_client.send_message(upd.message.chat.id, '[nice to meet you]') 
         print(f'ТЕСТ  {upd}  ТЕСТ')
         #await self.handle_update(upd)
             
@@ -57,7 +62,7 @@ class Worker:
         """
         await self._setup()
         self.is_runnig = True
-        self.consume_q = await self.queue.consume(self._worker, no_ack=True)
+        self.consume_q = await self.queue.consume(self._worker)
   
           
 

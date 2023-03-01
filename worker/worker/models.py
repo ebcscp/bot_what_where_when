@@ -44,3 +44,13 @@ class UpdateObj:
 
     class Meta:
         unknown = EXCLUDE
+
+@dataclass
+class SendMessageResponse:
+    ok: bool
+    result: Message
+
+    Schema: ClassVar[Type[Schema]] = Schema
+
+    class Meta:
+        unknown = EXCLUDE

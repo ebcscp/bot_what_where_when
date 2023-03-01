@@ -36,7 +36,7 @@ class Poller:
         except asyncio.CancelledError:
             pass
 
-        await self.rmq_worker.stop()        
+        await self.rabbit_client.stop()        
 
 def setup_config(config_path:str):
     config =  poller_config(config_path=config_path)  

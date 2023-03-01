@@ -39,11 +39,11 @@ services:
         POSTGRES_USER: "tg_user"
         POSTGRES_PASSWORD: "tg_password"
       ports:
-        - 5432:5432
+        - 15432:5432
       networks:
         - my-bridge
       healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U user_pg -d tg_game"]
+        test: ["CMD-SHELL", "pg_isready -U tg_user -d tg_game"]
         interval: 10s
         timeout: 5s
         retries: 5
@@ -59,7 +59,7 @@ services:
     container_name: pgadmin
     image: dpage/pgadmin4:latest
     environment:
-      PGADMIN_DEFAULT_EMAIL: "alesh.psk@gmail.com"
+      PGADMIN_DEFAULT_EMAIL: "ebcscp2@yandex.ru"
       PGADMIN_DEFAULT_PASSWORD: "pgadminpass"
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
@@ -78,7 +78,8 @@ services:
       - postgres
 
   rabbitmq:
-    image: rabbitmq:3-management
+    container_name: rabbitmq
+    build: poller/rabbit/
     hostname: rabbitmq
     restart: always
     environment:
@@ -89,31 +90,37 @@ services:
       - 5672:5672
     networks:
       - my-bridge
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:5672"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
 
-
-  admin:
-    container_name: admin
-    build: admin/
-    ports:
-        - 8080:8080
-    depends_on:
-      postgres:
-          condition: service_healthy
-    volumes:
-      - /multy_serv_vol/configs:/home/admin/configs
-    #command: alembic upgrade head
-    command: python main.py
-    networks:
-      - my-bridge
+  # admin:
+  #   container_name: admin
+  #   build: admin/
+  #   ports:
+  #       - 8080:8080
+  #   depends_on:
+  #     postgres:
+  #         condition: service_healthy
+  #   volumes:
+  #     - /multy_serv_vol/configs:/home/admin/configs
+  #   #command: alembic upgrade head
+  #   command: python main.py
+  #   networks:
+  #     - my-bridge
       
   poller:
     container_name: poller
     build: poller/
-    depends_on:
-      rabbitmq:
-          condition: service_healthy
-    volumes:
-      - /multy_serv_vol/configs:/home/poller/configs
+    # depends_on:
+    #     rabbitmq:
+    #       condition: service_healthy
+        # postgres:
+        #   condition: service_healthy  
+    #volumes:
+    #  - /multy_serv_vol/configs:/home/poller/configs    
     command: python main.py
     networks:
       - my-bridge 
@@ -121,11 +128,13 @@ services:
   worker:
     container_name: worker
     build: worker/
-    depends_on:
-      rabbitmq:
-          condition: service_healthy
-    volumes:
-      - /multy_serv_vol/configs:/home/worker/configs
+    # depends_on:
+    #     rabbitmq:
+    #       condition: service_healthy
+      # postgres:
+      #     condition: service_healthy  
+    #volumes:
+     # - /multy_serv_vol/configs:/home/worker/configs
     command: python main.py
     networks:
       - my-bridge       
@@ -135,4 +144,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 192.168.40.0/24
+        - subnet: 192.168.45.0/24

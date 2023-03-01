@@ -1,6 +1,5 @@
-import typing
+
 from dataclasses import dataclass
-import yaml
 
 
 @dataclass

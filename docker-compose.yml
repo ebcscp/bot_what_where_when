@@ -114,9 +114,9 @@ services:
   poller:
     container_name: poller
     build: poller/
-    # depends_on:
-    #     rabbitmq:
-    #       condition: service_healthy
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
         # postgres:
         #   condition: service_healthy  
     #volumes:
@@ -128,9 +128,9 @@ services:
   worker:
     container_name: worker
     build: worker/
-    # depends_on:
-    #     rabbitmq:
-    #       condition: service_healthy
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
       # postgres:
       #     condition: service_healthy  
     #volumes:

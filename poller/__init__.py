@@ -1,4 +1,4 @@
-from poller.dataclass_config import Config, RabbitConfig, TgConfig 
+from dataclass_config import Config, RabbitConfig, TgConfig 
 from poller.poller.tg_api import TgClient
 from poller.rabbit.rmq_worker import WorkerRmq
 import yaml

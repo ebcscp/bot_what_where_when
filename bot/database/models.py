@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from bot.database.sqlalchemy_base import db
+from database.sqlalchemy_base import db
 from sqlalchemy import Column, Integer,String,Boolean, ForeignKey, VARCHAR, DateTime
-from sqlalchemy.orm import relation
+from sqlalchemy.orm import relationship
 
 @dataclass
 class Theme:
@@ -28,6 +28,7 @@ class Answer:
 class User:
     id: int
     tg_id: int
+    chat_id: int
     first_name: str
     last_name: str
 
@@ -54,7 +55,9 @@ class Round:
     number_of_point_users: int
     number_of_point_bot: int
     number_of_round: int
-    
+
+
+
 @dataclass
 class Question:
     id: int 
@@ -69,41 +72,17 @@ class Answer:
 
 
 #######################33
-class User(db):
-    __tablename__="user"
-    id = Column(Integer, primary_key=True)
-    tg_id = Column(Integer)
-    first_name = Column(VARCHAR(50))
-    last_name = Column(VARCHAR(50))
-
-class Session(db):
-    id = Column(Integer, primary_key=True)
-    id_chat = Column(Integer)
-    date_start = Column(DateTime)
-    date_expiration = Column(DateTime)
-    status = Column(VARCHAR(20))
-    session_result = Column(VARCHAR(20))
-
-class ThemeModel(db):
-    __tablename__ = "themes"
-    id = Column(Integer, primary_key=True)
-    title = Column(VARCHAR(200), nullable=False, unique=True)
-    questions = relation("QuestionModel", back_populates="theme")
-
 
 class QuestionModel(db):
-    __tablename__ = "questions"
+    __tablename__ = "question"
     id = Column(Integer, primary_key=True)
     title = Column(VARCHAR(200), nullable=False, unique=True)
-    theme_id = Column(Integer, ForeignKey("themes.id", ondelete="CASCADE"), nullable=False)
-    answers = relation("AnswerModel", back_populates="question")
-    theme = relation("ThemeModel", back_populates="questions")
+    answers = relationship("AnswerModel", back_populates="question")
 
 
 class AnswerModel(db):
-    __tablename__ = "answers"
+    __tablename__ = "answer"
     id = Column(Integer, primary_key=True)
     title = Column(VARCHAR(250), nullable=False, unique=True)
-    is_correct = Column(Boolean, nullable=False)
-    question_id = Column(Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=False)
-    question = relation("QuestionModel", back_populates="answers")
+    question_id = Column(Integer, ForeignKey("question.id", ondelete="CASCADE"), nullable=False)
+    question = relationship("QuestionModel", back_populates="answer")

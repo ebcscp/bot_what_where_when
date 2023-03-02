@@ -1,8 +1,8 @@
 import asyncio
 from typing import Optional
-# from poller.tg_api import TgClient
 from poller import Client, poller_config
 from poller.poller.models import UpdateObj
+
 
 
 class Poller:
@@ -16,7 +16,7 @@ class Poller:
         
         offset = 0
         while self.is_running:
-            updates = await self.tg_client.get_updates_in_objects(offset=offset, timeout=5)
+            updates = await self.tg_client.get_updates_in_objects(offset=offset, timeout=60)
             for update in updates:
                 offset = update.update_id + 1
                 data = UpdateObj.Schema().dump(update)

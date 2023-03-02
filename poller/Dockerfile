@@ -3,6 +3,9 @@ FROM python:3.9-alpine
 RUN adduser -D poller	
 WORKDIR /home/poller
 
+#CMD ["export", "PYTHONPATH", "=", "."]
+ENV PYTHONPATH "${PYTHONPATH}:/home"
+
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
@@ -14,3 +17,4 @@ COPY dataclass_config.py .
 COPY main.py .
 
 USER poller
+

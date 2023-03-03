@@ -39,7 +39,7 @@ services:
         POSTGRES_USER: "tg_user"
         POSTGRES_PASSWORD: "tg_password"
       ports:
-        - 15432:5432
+        - 5432:5432
       networks:
         - my-bridge
       healthcheck:
@@ -96,20 +96,19 @@ services:
         timeout: 10s
         retries: 5
 
-  # admin:
-  #   container_name: admin
-  #   build: admin/
-  #   ports:
-  #       - 8080:8080
+  # worker:
+  #   container_name: worker
+  #   build: bot/
   #   depends_on:
-  #     postgres:
-  #         condition: service_healthy
-  #   volumes:
-  #     - /multy_serv_vol/configs:/home/admin/configs
-  #   #command: alembic upgrade head
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     # postgres:
+  #     #     condition: service_healthy  
+  #   #volumes:
+  #    # - /multy_serv_vol/configs:/home/worker/configs
   #   command: python main.py
   #   networks:
-  #     - my-bridge
+  #     - my-bridge    
       
   poller:
     container_name: poller
@@ -126,19 +125,19 @@ services:
     networks:
       - my-bridge 
 
-  worker:
-    container_name: worker
-    build: worker/
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      # postgres:
-      #     condition: service_healthy  
-    #volumes:
-     # - /multy_serv_vol/configs:/home/worker/configs
-    command: python main.py
-    networks:
-      - my-bridge       
+  # worker:
+  #   container_name: worker
+  #   build: worker/
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     # postgres:
+  #     #     condition: service_healthy  
+  #   #volumes:
+  #    # - /multy_serv_vol/configs:/home/worker/configs
+  #   command: python main.py
+  #   networks:
+  #     - my-bridge       
 
 networks:
   my-bridge:

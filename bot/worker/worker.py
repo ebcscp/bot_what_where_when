@@ -6,7 +6,8 @@ import aio_pika
 import json
 import yaml
 from worker.tg_api import TgClient
-
+from manager import TgApiAccessor
+from database.database import Database
 
 
 @dataclass
@@ -23,14 +24,18 @@ class Worker:
         self.consume_q = None
         self.count_worker = 0
         self.stop_event = asyncio.Event()
-        self.tg_client = TgClient()
+        self.tg_client = TgClient(self.config.token,self.config.api_path) 
         self.queue = None
+        self.tg_api_accessor = TgApiAccessor()
+        self.database = Database()
 
     async def handler(self, msg: aio_pika.IncomingMessage):
 
         upd = UpdateObj.Schema().loads(msg.body)
-        await self.tg_client.send_message(upd.message.chat.id, '[nice to meet you]') 
-        print(f'ТЕСТ  {upd}  ТЕСТ')
+        await self.tg_api_accessor._get_worker(upd.message.chat.id, upd.message.text)
+
+        # await self.tg_client.send_message(upd.message.chat.id, massege) 
+        # print(f'ТЕСТ  {upd}  ТЕСТ')
         #await self.handle_update(upd)
             
     async def _worker(self, msg: aio_pika.IncomingMessage):
@@ -43,9 +48,7 @@ class Worker:
                 self.count_worker -= 1
                 if not self.is_runnig and self.conect_work == 0:
                     self.stop_event.set()
-
-
-        #raise NotImplementedError     
+  
 
     async def _setup(self):
         if self.conect_work:
@@ -57,19 +60,16 @@ class Worker:
         self.conect_work = True
 
     async def start(self):
-        """
-        объявить очередь и добавить обработчик к ней
-        """
         await self._setup()
-        self.is_runnig = True
+        await self.database.connect(self.config.base_url)
+        self.is_runnig = True       
         self.consume_q = await self.queue.consume(self._worker)
+
+    
   
           
 
     async def stop(self):
-        """
-        закрыть все ресурсы, с помощью которых работали с rabbit
-        """
         if self.consume_q:
             await self.queue.cancel(self.consume_q)
         self.is_runnig = False  
@@ -78,6 +78,7 @@ class Worker:
             await self.stop_event.wait()
         if self.connection:
             await self.connection.close()
+        await self.database.disconnect()    
 
 def run_worker(config_path:str):
 
@@ -86,8 +87,12 @@ def run_worker(config_path:str):
 
     Worker_config=WorkerConfig(
             rabbit_url=raw_config["rabbitmq"]["rabbit_url"],
-            queue_name=raw_config["rabbitmq"]["queue_name"],            
-        )
+            queue_name=raw_config["rabbitmq"]["queue_name"], 
+            base_ul=raw_config["database"]["base_url"],  
+            token=raw_config["bot"]["token"],
+            api_path=raw_config["bot"]["api_path"],           
+        ), 
+
     
     worker = Worker(Worker_config)
 

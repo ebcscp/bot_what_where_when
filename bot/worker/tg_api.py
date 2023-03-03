@@ -12,10 +12,9 @@ class TgClientError(Exception):
     pass
 
 class TgClient:
-    API_PATH = 'https://api.telegram.org'
-
-    def __init__(self, token: str = ''):
-        self.token = "6291132929:AAGe2sRTPRxG6WLWn0RqQmi-8mFqYXuUWZM"
+    def __init__(self, token: str = '', api_path:str = ''):
+        self.token = token
+        self.api_path = api_path
 
     def get_base_path(self):
         return f'{self.API_PATH}/bot{self.token}'

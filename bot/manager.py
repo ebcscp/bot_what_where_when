@@ -1,19 +1,14 @@
-import typing
-from typing import Optional
 from urllib.parse import urljoin
-from webbrowser import get
+import requests
+import json
 
-from aiohttp import TCPConnector
-from aiohttp.client import ClientSession
-
-from database.base_accessor import BaseAccessor
 from admin.models import Answer, Question
-from worker.tg_api import TgClient
-
+from tg_api import TgClient
+from admin.accessor import AdminAccessor
 
 class TgApiAccessor(TgClient):
     def __init__(self, *args, **kwargs):
-        pass
+        self.accessor = AdminAccessor()
 
     async def connect(self):
         pass
@@ -21,17 +16,18 @@ class TgApiAccessor(TgClient):
     async def disconnect(self):
         pass
             
-    async def _get_worker(self, chat_id: int, text: str):
+    async def _get_admin_worker(self, chat_id: int, url: str = ' ' ):
         if chat_id == 1079223049:
-            if text == '/admin':
-                return "Добро пожаловать в админку!"  
-            elif text == '/create_question':
-                self.send_message()
-                return "Введите "                  
-            else:
-                return "В разработке"
-        else:
-            return "Не верный чат id"        
+            response = requests.get(url)
+            data = response.content    
+            results = json.loads(data) 
+            print(results)
+            lst_answers = []
+            for result in results:
+                for answer in result["answer"]:               
+                    lst_answers.append(Answer(title=answer))
+
+                await self.accessor.create_question(title=result["title"], answers=lst_answers)
       
     # async def distribution(self, data):    
     #     updates = []

@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from database.sqlalchemy_base import db
 from sqlalchemy import Column, Integer,String,Boolean, ForeignKey, VARCHAR, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relation
 
-
+from sqlalchemy.orm import relation
 
 
 @dataclass
@@ -14,8 +14,8 @@ class Question:
 
 @dataclass
 class Answer:
-    id:int
-    question_id:int
+    # id:int
+    # question_id:int
     title: str
 
 
@@ -25,7 +25,7 @@ class QuestionModel(db):
     __tablename__ = "question"
     id = Column(Integer, primary_key=True)
     title = Column(VARCHAR(200), nullable=False, unique=True)
-    answers = relationship("AnswerModel", back_populates="question")
+    answer = relation("AnswerModel", back_populates="question")
 
 
 class AnswerModel(db):
@@ -33,4 +33,4 @@ class AnswerModel(db):
     id = Column(Integer, primary_key=True)
     title = Column(VARCHAR(250), nullable=False, unique=True)
     question_id = Column(Integer, ForeignKey("question.id", ondelete="CASCADE"), nullable=False)
-    question = relationship("QuestionModel", back_populates="answer")
+    question = relation("QuestionModel", back_populates="answer")

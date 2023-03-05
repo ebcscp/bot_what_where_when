@@ -25,11 +25,23 @@ class Chat:
         unknown = EXCLUDE
 
 @dataclass
+class File:
+    file_id: str
+    file_unique_id: str
+    file_size: int
+    file_path: Optional[str] = None
+    file_name: Optional[str] = None
+
+    class Meta:
+        unknown = EXCLUDE
+        
+@dataclass
 class Message:
     message_id: int
     from_: MessageFrom = field(metadata={'data_key': 'from'})
     chat: Chat
     text: Optional[str]
+    document: Optional[File] = None
 
     class Meta:
         unknown = EXCLUDE
@@ -54,3 +66,15 @@ class SendMessageResponse:
 
     class Meta:
         unknown = EXCLUDE
+
+
+         
+@dataclass
+class GetFileResponse:
+    ok: bool
+    result: File
+
+    Schema: ClassVar[Type[Schema]] = Schema
+
+    class Meta:
+        unknown = EXCLUDE       

@@ -1,10 +1,11 @@
-from database.base_accessor import BaseAccessor
-from models import AnswerModel, QuestionModel, Answer, Question
+from database.database import Database
+import typing
+from admin.models import AnswerModel, QuestionModel, Answer, Question
 from sqlalchemy import select as Select
 from sqlalchemy.orm import joinedload
 
 
-class UserAccessor(BaseAccessor):
+class AdminAccessor():
     async def create_answers(
         self, question_id: int, answers: list[Answer]
     ) -> list[Answer]:
@@ -22,7 +23,7 @@ class UserAccessor(BaseAccessor):
         self, title: str, answers: list[Answer]
     ) -> Question:
         question_model = QuestionModel(title=title)
-        await self.insert(question_model)
+        await self.database.insert(question_model)
         question = Question(
             id=question_model.id,
             title=question_model.title,

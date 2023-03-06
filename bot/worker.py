@@ -15,19 +15,18 @@ class Worker:
         self.tg_client = None
         self.queue = None
         self.pgcli = None
-        self.store =None
+        self.store = None
 
     async def handler(self, msg: aio_pika.IncomingMessage):
-
         upd = UpdateObj.Schema().loads(msg.body)
-        # print(f'ТЕСТ  {upd}  ТЕСТ')
+        print(f'ТЕСТ  {upd.my_chat_member}  ТЕСТ')
         if upd.message.document:
             file = await self.store.tg_client.get_file(upd.message.document.file_id)
             file = await self.store.tg_client.get_file(upd.message.document.file_id)
             url = f'{self.config.tg_config.api_path}/file/bot{self.config.tg_config.token}/{file.file_path}'
             await self.store.manager._get_admin_worker(upd.message.chat.id, url)
-
-        # await self.tg_client.send_message(upd.message.chat.id, massege) 
+        #elif upd.message.
+        #await self.store.tg_client.send_message(upd.message.chat.id, upd.message.text) 
         
             
     async def _worker(self, msg: aio_pika.IncomingMessage):

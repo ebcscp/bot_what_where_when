@@ -24,7 +24,7 @@ class Database:
         self._db = db
         self._engine = create_async_engine(base_url, echo=True, future=True)
         self.session = sessionmaker(self._engine, expire_on_commit=False, class_=AsyncSession)  
-        print(self.session)     
+
         
     async def disconnect(self, *_: list, **__: dict) -> None:
         if self.session:
@@ -32,10 +32,12 @@ class Database:
         if self._engine:
             await self._engine.dispose() 
             
+
     async def select(self, query):
         async with self.session() as session:
             res: ChunkedIteratorResult = await session.execute(query)
             return res
+        
         
     async def insert(self, new_obj):
         print(self.bot.pgcli.session())

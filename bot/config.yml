@@ -7,7 +7,7 @@ database:
   base_url: postgresql+asyncpg://tg_user:tg_password@localhost/tg_game
 bot:
   api_path: https://api.telegram.org
-  token: 6291132929:AAGe2sRTPRxG6WLWn0RqQmi-8mFqYXuUWZM
+  token: 5603173084:AAHWD4jOUnbCbs_XLIPQ8OS4kamd2owOOpI
   id:
 rabbitmq:
   queue_name:  tg_bot

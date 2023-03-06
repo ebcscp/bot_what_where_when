@@ -20,10 +20,27 @@ class MessageFrom:
 class Chat:
     id: int
     type: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    title: Optional[str] = None
 
     class Meta:
         unknown = EXCLUDE
+@dataclass
+class PrivateChat(Chat):
+    id: int
+    first_name: str
+    last_name: str
+    username: str
 
+
+@dataclass
+class GroupChat(Chat):
+    id: int
+    type: str
+    title: str
+    
 @dataclass
 class File:
     file_id: str
@@ -45,12 +62,47 @@ class Message:
 
     class Meta:
         unknown = EXCLUDE
+@dataclass
+class User:
+    id: int
+    first_name: str
+    last_name: str
 
+    class Meta:
+        unknown = EXCLUDE
 
+@dataclass
+class NewChatMember:
+    user: User
+    status: Optional[str] = None
+
+    class Meta:
+        unknown = EXCLUDE
+
+@dataclass
+class MyChatMember:
+    chat: Chat
+    from_: MessageFrom
+    new_chat_member: NewChatMember
+
+    class Meta:
+        unknown = EXCLUDE
+        
+@dataclass
+class CallbackQuery:
+    id: int
+    from_: MessageFrom
+    message: Message
+    data: str
+
+    class Meta:
+        unknown = EXCLUDE
 @dataclass
 class UpdateObj:
     update_id: int
     message: Message
+    my_chat_member: Optional[MyChatMember] = None
+    callback_query: Optional[CallbackQuery] = None
 
     Schema: ClassVar[Type[Schema]] = Schema
 

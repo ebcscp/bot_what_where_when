@@ -4,27 +4,6 @@ from sqlalchemy import Column, Integer,String,Boolean, ForeignKey, VARCHAR, Date
 from sqlalchemy.orm import relationship
 
 @dataclass
-class Theme:
-    id: int 
-    title: str
-
-
-@dataclass
-class Question:
-    id: int 
-    title: str
-    theme_id: int
-    answers: list["Answer"]
-
-
-@dataclass
-class Answer:
-    title: str
-    is_correct: bool
-
-###################3
-
-@dataclass
 class User:
     id: int
     tg_id: int
@@ -56,6 +35,12 @@ class Round:
     number_of_point_bot: int
     number_of_round: int
 
+@dataclass
+class SessionQuestion:
+    id: int
+    id_session: int    
+    id_question: int
+    is_answerd: str
 
 
 @dataclass
@@ -71,18 +56,35 @@ class Answer:
     title: str
 
 
-#######################33
+class SessionsModel(db):
+    __tablename__ = "sessions" 
+    id = Column(Integer, primary_key=True) 
+    id_chat = Column(Integer) 
+    start_date = Column(DateTime)
+    end_date = Column(DateTime)
+    status = Column(VARCHAR(20))  
 
-class QuestionModel(db):
-    __tablename__ = "question"
+class SessionQuestionModel(db):
+    __tablename__ = "session_users" 
     id = Column(Integer, primary_key=True)
-    title = Column(VARCHAR(200), nullable=False, unique=True)
-    answers = relationship("AnswerModel", back_populates="question")
+    id_session = Column(Integer, ForeignKey("sessions.id")) 
+    id_session = Column(Integer)  
+    is_answerd = Column(VARCHAR(50))  
 
-
-class AnswerModel(db):
-    __tablename__ = "answer"
+class SessionUsersModel(db):
+    __tablename__ = "session_users" 
     id = Column(Integer, primary_key=True)
-    title = Column(VARCHAR(250), nullable=False, unique=True)
-    question_id = Column(Integer, ForeignKey("question.id", ondelete="CASCADE"), nullable=False)
-    question = relationship("QuestionModel", back_populates="answer")
+    id_session = Column(Integer, ForeignKey("sessions.id")) 
+    id_user = Column(Integer, ForeignKey("users.id"))  
+    status_user = Column(Boolean) 
+
+
+class RoundsModel(db):
+    __tablename__ = "rounds"       
+    id = Column(Integer, primary_key=True)
+    id_session = Column(Integer, ForeignKey("sessions.id")) 
+    id_user = Column(Integer, ForeignKey("users.id"))
+    id_rival = Column(Integer)
+    points = Column(Integer)
+    round_number = Column(VARCHAR(3))
+    result = Column(VARCHAR(20))

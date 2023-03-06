@@ -124,7 +124,13 @@ services:
     command: python main.py
     networks:
       - my-bridge 
-
+      
+networks:
+  my-bridge:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.46.0/24
   # worker:
   #   container_name: worker
   #   build: worker/
@@ -139,9 +145,4 @@ services:
   #   networks:
   #     - my-bridge       
 
-networks:
-  my-bridge:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.45.0/24
+

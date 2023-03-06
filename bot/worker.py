@@ -3,46 +3,29 @@ import asyncio
 from aio_pika import connect, Message
 from models import UpdateObj
 import aio_pika
-import json
-import yaml
-from tg_api import TgClient
-from manager import TgApiAccessor
-from database.database import Database
-from database.base_accessor import Database
-from main_config import worker_config
-from store import setup_store
-from dataclass_config import BaseConfig,Config,WorkerConfig
-
-@dataclass
-class WorkerConfig:
-    rabbit_url: str
-    queue_name: str
-    base_url:str
-    token: str
-    api_path: str
 
 class Worker:
-    def __init__(self, config: Config):
-        self.workerconfig = config.Worker_config
-        self.baseconfig = config.Base_config
+    def __init__(self):
+        self.config = None
         self.conect_work = False
         self.connection = None
         self.consume_q = None
         self.count_worker = 0
         self.stop_event = asyncio.Event()
-        self.tg_client = TgClient(self.workerconfig.token, self.workerconfig.api_path) 
+        self.tg_client = None
         self.queue = None
-        self.tg_api_accessor = TgApiAccessor()
-        self.pgcli = Database()
+        self.pgcli = None
+        self.store =None
 
     async def handler(self, msg: aio_pika.IncomingMessage):
 
         upd = UpdateObj.Schema().loads(msg.body)
         # print(f'ТЕСТ  {upd}  ТЕСТ')
         if upd.message.document:
-            file = await self.tg_client.get_file(upd.message.document.file_id)
-            url = f'{self.workerconfig.api_path}/file/bot{self.workerconfig.token}/{file.file_path}'
-            await self.tg_api_accessor._get_admin_worker(upd.message.chat.id, url)
+            file = await self.store.tg_client.get_file(upd.message.document.file_id)
+            file = await self.store.tg_client.get_file(upd.message.document.file_id)
+            url = f'{self.config.tg_config.api_path}/file/bot{self.config.tg_config.token}/{file.file_path}'
+            await self.store.manager._get_admin_worker(upd.message.chat.id, url)
 
         # await self.tg_client.send_message(upd.message.chat.id, massege) 
         
@@ -62,17 +45,17 @@ class Worker:
     async def _setup(self):
         if self.conect_work:
             return
-        self.connection = await connect(url= self.workerconfig.rabbit_url)
+        self.connection = await connect(url= self.config.worker_config.rabbit_url)
         self.channel = await self.connection.channel()
         #await self.channel.set_qos(prefetch_count=self.config.capacity)
-        self.queue = await self.channel.declare_queue(self.workerconfig.queue_name)
+        self.queue = await self.channel.declare_queue(self.config.worker_config.queue_name)
         
         self.conect_work = True
 
 
     async def start(self):
         await self._setup()   
-        await self.database.connect(self.baseconfig.base_url)   
+        await self.pgcli.connect(self.config.base_config.base_url)   
         self.is_runnig = True       
         self.consume_q = await self.queue.consume(self._worker)
 
@@ -86,29 +69,10 @@ class Worker:
             await self.stop_event.wait()
         if self.connection:
             await self.connection.close()
-        await self.database.disconnect()  
-        
-def setup_config(config_path:str):
-    bot = Worker(worker_config(config_path=config_path))  
-    setup_store(bot)
-    return bot
+        await self.pgcli.disconnect()  
 
 
 def run_worker(bot:str):
-
-    # with open(config_path, "r", encoding="utf-8") as f:
-    #         raw_config = yaml.safe_load(f)
-
-    # Worker_config=WorkerConfig(
-    #         rabbit_url=raw_config["rabbitmq"]["rabbit_url"],
-    #         queue_name=raw_config["rabbitmq"]["queue_name"], 
-    #         base_url=raw_config["database"]["base_url"],  
-    #         token=raw_config["bot"]["token"],
-    #         api_path=raw_config["bot"]["api_path"],           
-    #     )
-    
-    # worker = Worker(Worker_config)
-
     loop = asyncio.get_event_loop()
     try:
         loop.create_task(bot.start())

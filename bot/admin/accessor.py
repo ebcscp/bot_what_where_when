@@ -3,9 +3,11 @@ import typing
 from admin.models import AnswerModel, QuestionModel, Answer, Question
 from sqlalchemy import select as Select
 from sqlalchemy.orm import joinedload
+from store import Database
 
-
-class AdminAccessor():
+class AdminAccessor(Database):
+    def __init__(self, bot: "Worker"):
+        self.bot = bot
     async def create_answers(
         self, question_id: int, answers: list[Answer]
     ) -> list[Answer]:
@@ -14,7 +16,7 @@ class AdminAccessor():
             answer_model = AnswerModel(title=answer.title,
                                        question_id=question_id,
                                   )
-            await self.insert(answer_model)
+            await self.bot.pgcli.insert(answer_model)
             
             #res_answers.append(answer)
         #return res_answers
@@ -23,29 +25,28 @@ class AdminAccessor():
         self, title: str, answers: list[Answer]
     ) -> Question:
         question_model = QuestionModel(title=title)
-        await self.database.insert(question_model)
+        await self.bot.pgcli.insert(question_model)
         question = Question(
             id=question_model.id,
             title=question_model.title,
             answers=answers
         )
         await self.create_answers(question.id, answers)
-        #return await self.get_question_by_title(title)
-
+        #return await self.get_question_by_title(title)        
     
-    async def get_question_by_title(self, title: str) -> Question:
-        question_model = Select(QuestionModel).where(QuestionModel.title == title).options(joinedload(QuestionModel.answers))
-        res = await self.select(question_model)
+    # async def get_question_by_title(self, title: str) -> Question:
+    #     question_model = Select(QuestionModel).where(QuestionModel.title == title).options(joinedload(QuestionModel.answers))
+    #     res = await self.bot.pgcli.select(question_model)
 
-        question = None
-        raw_question = res.first()
+    #     question = None
+    #     raw_question = res.first()
         
-        if raw_question:
-            question = Question(id=raw_question[0].id,
-                                title=raw_question[0].title,
-                                theme_id=raw_question[0].theme_id,
-                                answers=[Answer(a.title, a.is_correct) for a in raw_question[0].answers])
-        return question
+    #     if raw_question:
+    #         question = Question(id=raw_question[0].id,
+    #                             title=raw_question[0].title,
+    #                             theme_id=raw_question[0].theme_id,
+    #                             answers=[Answer(a.title, a.is_correct) for a in raw_question[0].answers])
+    #     return question
 
         
     # async def list_questions(self, theme_id: int | None = None) -> list[Question]:

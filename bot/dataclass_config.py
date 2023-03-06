@@ -5,14 +5,19 @@ from dataclasses import dataclass
 class WorkerConfig:
     rabbit_url: str
     queue_name: str
-    token: str
-    api_path: str
+
 
 @dataclass
 class BaseConfig:
     base_url:str
 
 @dataclass
+class TgConfig:
+    token: str
+    api_path: str
+
+@dataclass
 class Config:
-    Worker_config: WorkerConfig = None
-    Base_config: BaseConfig = None    
+    worker_config: WorkerConfig = None
+    base_config: BaseConfig = None 
+    tg_config: TgConfig = None   

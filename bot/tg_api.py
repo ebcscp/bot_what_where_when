@@ -1,20 +1,23 @@
 from json import JSONDecodeError
 from typing import Optional, List
-
+import typing
 import aiohttp
 from marshmallow.exceptions import ValidationError
 
 from models import  Message, SendMessageResponse, GetFileResponse, File
 
+if typing.TYPE_CHECKING:
+    from worker import Worker
 
 
 class TgClientError(Exception):
     pass
 
 class TgClient:
-    def __init__(self, token: str = '', api_path:str = ''):
-        self.token = token
-        self.api_path = api_path
+    def __init__(self, bot: "Worker"):
+        self.token = bot.config.tg_config.token
+        self.api_path = bot.config.tg_config.api_path
+        self.bot = bot
 
     def get_base_path(self):
         return f'{self.api_path}/bot{self.token}'

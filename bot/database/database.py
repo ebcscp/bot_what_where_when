@@ -13,10 +13,11 @@ if typing.TYPE_CHECKING:
 
 
 class Database:
-    def __init__(self):
+    def __init__(self, bot: "Worker"):
         self._engine: Optional[AsyncEngine] = None
         self._db: Optional[declarative_base] = None
         self.session: Optional[AsyncSession] = None
+        self.bot = bot
 
 
     async def connect(self, base_url, *_: list, **__: dict) -> None:
@@ -37,7 +38,7 @@ class Database:
             return res
         
     async def insert(self, new_obj):
-        print(self.session)
+        print(self.bot.pgcli.session())
         async with self.session() as session:   
              async with session.begin():
                 print(1)

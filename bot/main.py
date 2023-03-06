@@ -1,5 +1,6 @@
 import os
-from worker import run_worker, setup_config 
+from worker import run_worker
+from bot.bot import setup_config
 
 if __name__ == "__main__":
     run_worker(

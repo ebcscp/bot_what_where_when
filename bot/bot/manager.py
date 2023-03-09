@@ -47,12 +47,36 @@ class BotAccessor(Database):
     async def start_game(self, upd):
         chat_id = upd.callback_query.message.chat.id if upd.callback_query else upd.message.chat.id
 
-        check_game_session = self.bot.pgcli.get_gs_in_chat(chat_id)
+        check_game_session = self.bot.pgcli.get_session_in_chat(chat_id)
 
         if check_game_session:
             await self.send_keyboard(chat_id=chat_id, text=BotMsg.GameSessionActive.value)
         else:
             from_ = upd.callback_query.from_ if upd.callback_query else upd.message.from_
+            
+            user = await self.bot.game.creat_user_session(from_.id, from_.first_name, from_.username)
+            print(user)
+            
+            new_session = await self.bot.store.game.create_game_session(chat_id=chat_id,
+                                                                   state=StateEnum.Active)
+            user_session = await self.bot.store.game.create_user_session(session_id=new_session.id,
+                                                                   user_id=user.id,
+                                                                   is_master=True)
 
-            player = await self.bot.game.creat_user_session(from_.id, from_.first_name, from_.username)
+            await self.send_keyboard(chat_id=chat_id,
+                                     text=BotMsg.MenuDescription.value)
+            # TODO: вывести правила игры + кнопки: "Я участвую" и "Завершить набор"
+            des_mes = await self.bot.store.tg_cli.send_message(chat_id=chat_id,
+                                                               text=f"{BotMsg.GameRules.value} \n\n"
+                                                                    f"Игровой мастер: {user.first_name}",
+                                                               reply_markup=InlineKeyboardMarkup(
+                                                                   inline_keyboard=[BotButtons.JoinBtns.value]))    
 
+            
+            # 1) Создавать первого пользака, как мастера, при этом чекнув есть ли он в базе, если нет добавить в таблицу users!
+            # 2) Остальных пользователей добавлять также с проверкой, НО БЕЗ МАСТЕРА и автоматчиески закидывать в игровую сессию
+            # 3) 6 игроков максимум!
+            # 4) Рандомный капитан каманда!
+            # 5) Подумать как выбирать отвечающего...
+            # 6) Тайминги
+            # 7) Рандомно выбрать 11 вопросов!

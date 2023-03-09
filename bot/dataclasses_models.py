@@ -9,8 +9,8 @@ from marshmallow import Schema, EXCLUDE
 class MessageFrom:
     id: int
     first_name: str
-    last_name: Optional[str]
-    username: str
+    last_name: Optional[str] = None
+    username: Optional[str] = None
 
     class Meta:
         unknown = EXCLUDE
@@ -20,10 +20,7 @@ class MessageFrom:
 class Chat:
     id: int
     type: str
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    username: Optional[str] = None
-    title: Optional[str] = None
+
 
     class Meta:
         unknown = EXCLUDE
@@ -66,7 +63,7 @@ class Message:
 class User:
     id: int
     first_name: str
-    last_name: str
+    #last_name: str
 
     class Meta:
         unknown = EXCLUDE
@@ -82,7 +79,7 @@ class NewChatMember:
 @dataclass
 class MyChatMember:
     chat: Chat
-    from_: MessageFrom
+    from_: MessageFrom= field(metadata={'data_key':'from'})
     new_chat_member: NewChatMember
 
     class Meta:
@@ -91,7 +88,7 @@ class MyChatMember:
 @dataclass
 class CallbackQuery:
     id: int
-    from_: MessageFrom
+    from_: MessageFrom= field(metadata={'data_key':'from'})
     message: Message
     data: str
 
@@ -100,7 +97,7 @@ class CallbackQuery:
 @dataclass
 class UpdateObj:
     update_id: int
-    message: Message
+    message: Optional[Message] = None
     my_chat_member: Optional[MyChatMember] = None
     callback_query: Optional[CallbackQuery] = None
 

@@ -36,7 +36,7 @@ class StateEnum(enum):
 
 class ResultEnum(enum):
     Users = "Пользователи"
-    Bot = "Законченная"
+    Bot = "Бот"
 
 
 
@@ -67,7 +67,7 @@ class Answer:
 
 
 class UsersModel(db):
-    tablename = "users"
+    __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     tg_id = Column(BigInteger, nullable=False, unique=True)
     first_name = Column(VARCHAR(50), nullable=False)
@@ -76,7 +76,7 @@ class UsersModel(db):
     user_sessions = relation("SessionUsersModel", back_populates="users")
 
 class SessionUsersModel(db):
-    tablename = "session_users" 
+    __tablename__ = "session_users" 
     id = Column(Integer, primary_key=True)
 
     sessions_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
@@ -89,7 +89,7 @@ class SessionUsersModel(db):
     is_captain = Column(Boolean, default=False)
 
 class SessionsModel(db):
-    tablename = "sessions" 
+    __tablename__ = "sessions" 
     id = Column(Integer, primary_key=True) 
     id_chat = Column(Integer) 
     start_date = Column(DateTime, default=datetime.utcnow())
@@ -103,7 +103,7 @@ class SessionsModel(db):
 
 
 class RoundsModel(db):
-    tablename = "rounds"       
+    __tablename__ = "rounds"       
     id = Column(Integer, primary_key=True)
     id_session = Column(Integer, ForeignKey("sessions.id")) 
     points_team = Column(Integer)
@@ -114,7 +114,7 @@ class RoundsModel(db):
  
 
 class SessionQuestionModel(db):
-    tablename = "session_question" 
+    __tablename__ = "session_question" 
     id = Column(Integer, primary_key=True)
     id_session = Column(Integer, ForeignKey("sessions.id")) 
     id_qusetion = Column(Integer, ForeignKey("question.id"))   
@@ -123,7 +123,7 @@ class SessionQuestionModel(db):
     question = relation("QuestionModel", back_populates="session_question")
 
 class QuestionModel(db):
-    tablename = "question"    
+    __tablename__ = "question"    
     id = Column(Integer, primary_key=True)
     title = Column(VARCHAR(200))
     answer = relation("AnswerModel", back_populates="question")
@@ -132,7 +132,7 @@ class QuestionModel(db):
 
 
 class AnswerModel(db):
-    tablename =  "answer"
+    __tablename__ =  "answer"
     id = Column(Integer, primary_key=True)
     question_id = Column(Integer, ForeignKey("question.id", ondelete="CASCADE"), nullable=False) 
     title = Column(VARCHAR(200))    

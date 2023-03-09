@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 import asyncio
 from aio_pika import connect, Message
-from models import UpdateObj
+from dataclasses_models import UpdateObj
 import aio_pika
+
+from bot.enum_blanks import Commands
 
 class Worker:
     def __init__(self):
@@ -18,14 +20,19 @@ class Worker:
         self.store = None
 
     async def handler(self, msg: aio_pika.IncomingMessage):
+        #print(msg.body)
         upd = UpdateObj.Schema().loads(msg.body)
-        print(f'ТЕСТ  {upd.my_chat_member}  ТЕСТ')
-        if upd.message.document:
+        print(upd)
+        #print(f'ТЕСТ  {upd.message.chat.id}  ТЕСТ')
+        if upd.my_chat_member and upd.my_chat_member.new_chat_member.user.id == self.config.worker_config.bot_id:
+            await self.store.bot_accessor.add_bot_chat(upd)
+        elif (upd.callback_query and upd.callback_query.data == Commands.Start.value) or (upd.message and upd.message.text == Commands.Start.value):
+            await self.store.bot_manager.start_game(upd)    
+        elif upd.message and upd.message.chat.id == self.config.worker_config.bot_id and upd.message.document:
             file = await self.store.tg_client.get_file(upd.message.document.file_id)
             file = await self.store.tg_client.get_file(upd.message.document.file_id)
             url = f'{self.config.tg_config.api_path}/file/bot{self.config.tg_config.token}/{file.file_path}'
-            await self.store.manager._get_admin_worker(upd.message.chat.id, url)
-        #elif upd.message.
+            await self.store.manager._get_admin_worker(upd.message.chat.id, url)    
         #await self.store.tg_client.send_message(upd.message.chat.id, upd.message.text) 
         
             

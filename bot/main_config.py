@@ -10,8 +10,8 @@ def worker_config(bot:"Worker",config_path: str) -> Config:
     bot.config = Config(
         worker_config=WorkerConfig(
             rabbit_url=raw_config["rabbitmq"]["rabbit_url"],
-            queue_name=raw_config["rabbitmq"]["queue_name"],   
-          
+            queue_name=raw_config["rabbitmq"]["queue_name"],
+            bot_id=raw_config["bot"]["id"],            
         ),
         base_config=BaseConfig(
             base_url=raw_config["database"]["base_url"],

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class WorkerConfig:
     rabbit_url: str
     queue_name: str
+    bot_id: int
 
 
 @dataclass

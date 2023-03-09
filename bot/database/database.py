@@ -40,9 +40,7 @@ class Database:
         
         
     async def insert(self, new_obj):
-        print(self.bot.pgcli.session())
         async with self.session() as session:   
              async with session.begin():
-                print(1)
                 session.add(new_obj)
                 await session.commit()   

@@ -1,6 +1,6 @@
 from database.database import Database
 import typing
-from admin.models import AnswerModel, QuestionModel, Answer, Question
+from game.models import AnswerModel, QuestionModel, Answer, Question
 from sqlalchemy import select as Select
 from sqlalchemy.orm import joinedload
 from store import Database

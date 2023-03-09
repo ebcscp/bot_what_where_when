@@ -8,7 +8,7 @@ database:
 bot:
   api_path: https://api.telegram.org
   token: 5603173084:AAHWD4jOUnbCbs_XLIPQ8OS4kamd2owOOpI
-  id:
+  id: 5603173084
 rabbitmq:
   queue_name:  tg_bot
   exchange_name: bot_exchange

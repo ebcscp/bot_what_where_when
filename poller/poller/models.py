@@ -103,7 +103,7 @@ class MyChatMember:
 @dataclass
 class CallbackQuery:
     id: int
-    from_: MessageFrom
+    from_: MessageFrom = field(metadata={'data_key': 'from'})
     message: Message
     data: str
 

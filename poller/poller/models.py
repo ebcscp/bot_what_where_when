@@ -1,6 +1,5 @@
 from dataclasses import field
-from typing import ClassVar, Type, List, Optional
-
+from typing import ClassVar, Type, List, Optional 
 from marshmallow_dataclass import dataclass
 
 from marshmallow import Schema, EXCLUDE
@@ -72,9 +71,11 @@ class NewChatMember:
 class Message:
     message_id: int
     from_: MessageForm = field(metadata={'data_key':'from'})
+    date: int
     chat: Chat
     text: Optional[str] = None
     document: Optional[File] = None
+    
     
 
     class Meta:

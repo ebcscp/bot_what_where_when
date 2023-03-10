@@ -61,7 +61,7 @@ class BotAccessor(Database):
                                                                    state=StateEnum.Active)
             user_session = await self.bot.store.game.create_user_session(session_id=new_session.id,
                                                                    user_id=user.id,
-                                                                   is_master=True)
+                                                                   is_creator=True)
 
             await self.send_keyboard(chat_id=chat_id,
                                      text=BotMsg.MenuDescription.value)

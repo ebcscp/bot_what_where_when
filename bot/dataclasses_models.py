@@ -54,6 +54,7 @@ class Message:
     message_id: int
     from_: MessageFrom = field(metadata={'data_key': 'from'})
     chat: Chat
+    date: int
     text: Optional[str]
     document: Optional[File] = None
 

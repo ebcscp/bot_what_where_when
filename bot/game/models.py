@@ -47,12 +47,14 @@ class Round:
     points_team: int
     points_bot: int
     round_number: int
+    responsible: bool
 
 @dataclass
 class SessionQuestion:
     id: int
     id_session: int    
     id_question: int
+    is_answerd: bool
 
 
 @dataclass
@@ -109,6 +111,7 @@ class RoundsModel(db):
     points_team = Column(Integer)
     points_bot = Column(Integer)
     round_number = Column(Integer)
+    responsible = Column(bool)
 
     sessions = relation("SessionsModel", back_populates= "rounds")
  
@@ -117,7 +120,8 @@ class SessionQuestionModel(db):
     __tablename__ = "session_question" 
     id = Column(Integer, primary_key=True)
     id_session = Column(Integer, ForeignKey("sessions.id")) 
-    id_qusetion = Column(Integer, ForeignKey("question.id"))   
+    id_qusetion = Column(Integer, ForeignKey("question.id")) 
+    is_answerd = Column(Boolean)  
 
     sessions = relation("SessionsModel", back_populates="session_question")
     question = relation("QuestionModel", back_populates="session_question")

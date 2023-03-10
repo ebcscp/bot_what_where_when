@@ -49,12 +49,9 @@ class TgClient:
 
     async def get_updates_in_objects(self, *args, **kwargs) -> List[UpdateObj]:
         res_dict = await self.get_updates(*args, **kwargs)
-        #print(res_dict)
         try:
             gu_response: GetUpdatesResponse = GetUpdatesResponse.Schema().load(res_dict)
-            print(gu_response)
         except ValidationError as e:    
-            print(e)
             raise TgClientError
         return gu_response.result
 

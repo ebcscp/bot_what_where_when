@@ -130,19 +130,6 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 192.168.46.0/24
-  # worker:
-  #   container_name: worker
-  #   build: worker/
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #     # postgres:
-  #     #     condition: service_healthy  
-  #   #volumes:
-  #    # - /multy_serv_vol/configs:/home/worker/configs
-  #   command: python main.py
-  #   networks:
-  #     - my-bridge       
+        - subnet: 192.168.46.0/24     
 
 

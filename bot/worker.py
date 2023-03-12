@@ -4,7 +4,7 @@ from aio_pika import connect, Message
 from dataclasses_models import UpdateObj
 import aio_pika
 
-from bot.enum_blanks import Commands
+from bot.enum_blanks import Commands, CallBackData
 
 class Worker:
     def __init__(self):
@@ -23,16 +23,33 @@ class Worker:
         #print(msg.body)
         upd = UpdateObj.Schema().loads(msg.body)
         print(upd)
-        #print(f'ТЕСТ  {upd.message.chat.id}  ТЕСТ')
-        if upd.my_chat_member and upd.my_chat_member.new_chat_member.user.id == self.config.worker_config.bot_id:
-            await self.store.bot_accessor.add_bot_chat(upd)
-        elif (upd.callback_query and upd.callback_query.data == Commands.Start.value) or (upd.message and upd.message.text == Commands.Start.value):
-            await self.store.bot_manager.start_game(upd)    
-        elif upd.message and upd.message.chat.id == self.config.worker_config.bot_id and upd.message.document:
-            file = await self.store.tg_client.get_file(upd.message.document.file_id)
-            file = await self.store.tg_client.get_file(upd.message.document.file_id)
-            url = f'{self.config.tg_config.api_path}/file/bot{self.config.tg_config.token}/{file.file_path}'
-            await self.store.manager._get_admin_worker(upd.message.chat.id, url)    
+        if upd.message:
+            if upd.message.text == Commands.Start.value:
+                await self.store.manager.start_game(upd)
+            elif upd.message.text == Commands.Stop.value:
+                await self.store.manager.bot_stop_game(upd)
+                      
+            elif upd.message.document and upd.message.chat.id == self.config.worker_config.bot_id:
+                file = await self.store.tg_client.get_file(upd.message.document.file_id)
+                file = await self.store.tg_client.get_file(upd.message.document.file_id)
+                url = f'{self.config.tg_config.api_path}/file/bot{self.config.tg_config.token}/{file.file_path}'
+                print(url)
+                await self.store.manager._get_admin_worker(url) 
+            else:
+                await self.store.manager.begin_game(upd)     
+        elif upd.my_chat_member and upd.my_chat_member.new_chat_member.user.id == self.config.worker_config.bot_id:
+            await self.store.manager.add_bot_chat(upd)
+        elif (upd.callback_query and upd.callback_query.data == Commands.Start.value):
+            await self.store.manager.start_game(upd)
+        elif (upd.callback_query and upd.callback_query.data == Commands.Stop.value):
+            await self.store.manager.bot_stop_game(upd)        
+        elif upd.callback_query and upd.callback_query.data == CallBackData.IJoin.value:
+            await self.store.manager.join_user_game(upd=upd)
+        elif upd.callback_query and upd.callback_query.data == CallBackData.WeReady.value:
+            await self.store.manager.ready_game(upd=upd)
+        elif upd.callback_query and upd.callback_query.data == CallBackData.Go.value:
+            await self.store.manager.begin_game(upd=upd)         
+          
         #await self.store.tg_client.send_message(upd.message.chat.id, upd.message.text) 
         
             

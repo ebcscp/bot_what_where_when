@@ -18,7 +18,13 @@ class TgConfig:
     api_path: str
 
 @dataclass
+class Game:
+    user: str
+    questions: str
+    
+@dataclass
 class Config:
     worker_config: WorkerConfig = None
     base_config: BaseConfig = None 
-    tg_config: TgConfig = None   
+    tg_config: TgConfig = None 
+    game: Game = None  

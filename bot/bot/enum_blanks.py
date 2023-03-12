@@ -5,7 +5,39 @@ from telegram import InlineKeyboardButton
 
 class BotMsg(Enum):
     add =  f"Привет! Я бот игры 'Что? Где? Когда?', если хочешь поиграть просто нажми 'СТАРТ'! "
-    GameSessionActive = "В чате уже есть активная игра."
+    GameSessionActive = "В чате уже есть активная сессия игры."
+    MenuDescription = f"Для вас предоставлено командное меню: \n" \
+                      f"/stop - прервать игру. Доступно только для game-master.\n" \
+                      f"/game_inform - получить информацию о текущей игре.\n" \
+                      f"/general_rating - получить общий рейтинг."
+    GameRulesOne = f"Правила игры: \n" \
+                f"1. Кто готов учавствовать - жми 'Я участвую!' \n" \
+                f"2. В игре может принимать участиве до 6ти игроков, включая создателя игровой сессии. Если участников " \
+                f"меньше 6ти, то создателю игровой сессии нужно нажать 'Завершить набор' как только добавятся все игроки," \
+                f"или дождаться окончания таймера в 1 минуту\n" \
+                f"3. Если набор игроков не завершится за минуту или создатель игровой сессии не нажмет 'Завершить набор', " \
+                f"то будет выведено приглашение 'Начать игру' с тем кто успел или только с одним создателем игровой сессии \n" \
+                f"4. Если создатель игровой сессии не примет приглашение 'Начать игру' в течении минуты, то игра прервется. \n"\
+                f"5. Капитн команды назначается случайным образом из всех игроков. \n" \
+                f"6. После заданного вопроса, всей команде игроков дается 1 минута на обсуждение, " \
+                f"по истечению 1 минуты, капитан команды выбирает игрока, который даст ответ на заданный вопрос!\n "    
+    
+    GameRulesTwo = f"7. На ответ игроку дается 15 секунд, если за это время игрок не ответил или ответил не верно," \
+                f" боту начисляется 1 балл. \n" \
+                f"8. За правильный ответ начисляется 1 балл команде. \n" \
+                f"9. Игра продолжается пока команда или бот не наберут 6 баллов в сумме, или в случае: создатель игровой сессии остановил игру, \n" \
+                f"10. В игре максимум 11 раундов."   
+                
+    TimeoutWaitJoin = "Время ожидания набора игроков вышло!"        
+    TimeoutWaitJoinNoReade = "Игровая сессия автоматически завершилась, так как нет участников!" 
+    AlredyToPlayUser = ", вы уже участвуете в игре!"
+    JoinUserSession = " присоединился к игре!"
+    FullUserSession = "Набрано необходимое количесво игроков в команду, попробуйте в следующий раз!"   
+    CheckGod = " у тебя здесь нет власти, ты не создатель этой игровой сесии! Только он(а) может начать:"  
+    StopByGod = "Создатель остановил активную игру в этом чате. Создатель текущей игры: "         
+    UserGod = " у тебя здесь нет власти, ты не создатель этой игровой сесии! Только он может закончить досрочно:" 
+    SessionNoActive = "Нет активной игровой сесии!"
+    
     
 class StatusAddBot(Enum):
     Member = "member"
@@ -15,8 +47,7 @@ class StatusAddBot(Enum):
 class Commands(Enum):
     Stop = "/stop"
     Start = "/start"
-    GameInform = '/game_inform'
-    GeneralRating = '/general_rating'
+
 
 
 class CallBackData(Enum):
@@ -29,7 +60,6 @@ class CallBackData(Enum):
 class BotButtons(Enum):
     StartBtn = [InlineKeyboardButton("СТАРТ", callback_data=CallBackData.Start.value)]
     BeginBtn = [InlineKeyboardButton("Начать игру!", callback_data=CallBackData.Go.value)]
-    Keyboard = [[Commands.Start.value], [Commands.Stop.value], [Commands.GameInform.value],
-                [Commands.GeneralRating.value]]
+    Keyboard = [[Commands.Start.value], [Commands.Stop.value]]
     JoinBtns = [InlineKeyboardButton("Я участвую!", callback_data=CallBackData.IJoin.value),
                 InlineKeyboardButton("Завершить набор", callback_data=CallBackData.WeReady.value)]

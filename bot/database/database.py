@@ -43,4 +43,10 @@ class Database:
         async with self.session() as session:   
              async with session.begin():
                 session.add(new_obj)
-                await session.commit()   
+                await session.commit()
+    
+    async def update(self, query):
+        async with self.session() as session:
+            result = await session.execute(query)
+            await session.commit()
+            return result.rowcount               

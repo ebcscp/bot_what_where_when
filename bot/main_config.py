@@ -1,4 +1,4 @@
-from dataclass_config import BaseConfig, WorkerConfig, Config,  TgConfig
+from dataclass_config import BaseConfig, WorkerConfig, Config,  TgConfig, Game 
 import typing
 if typing.TYPE_CHECKING:
     from worker import Worker
@@ -19,7 +19,11 @@ def worker_config(bot:"Worker",config_path: str) -> Config:
         tg_config=TgConfig(
             token=raw_config["bot"]["token"],
             api_path=raw_config["bot"]["api_path"], 
-        ) 
+        ),
+        game=Game(
+            user=raw_config["game"]["user"],
+            questions=raw_config["game"]["questions"], 
+        ),
     )    
      
 

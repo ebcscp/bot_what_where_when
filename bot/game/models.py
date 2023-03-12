@@ -19,23 +19,27 @@ class UserSession:
     id_user: int
     is_creator: bool
     is_captain: bool
+    ready_to_play: bool
 
 @dataclass
 class Session:
     id: int
     id_chat: int
-    start_date: DateTime
-    end_date: DateTime
+    start_date: datetime 
+    end_date: datetime 
     status: str
     result: str
 
 class StateEnum(enum):
     Active = "Активная"
     Ended = "Законченная"
+    Established = "Создана"
+    ChoiceOfResponder = "Выбор отвечающего"
+    RypleProcess = "Ожидание ответа"
     Interrupted = "Прерванная"
 
 class ResultEnum(enum):
-    Users = "Пользователи"
+    Users = "Команда игроков"
     Bot = "Бот"
 
 
@@ -81,9 +85,9 @@ class SessionUsersModel(db):
     __tablename__ = "session_users" 
     id = Column(Integer, primary_key=True)
 
-    sessions_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
-    users_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    
+    sessions_id = Column(BigInteger, ForeignKey("sessions.id", ondelete="CASCADE"), nullable=False)
+    users_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    ready_to_play = Column(Boolean)
     sessions = relation("SessionsModel", back_populates="user_sessions")
     users = relation("UsersModel", back_populates="user_sessions")
 
@@ -93,7 +97,7 @@ class SessionUsersModel(db):
 class SessionsModel(db):
     __tablename__ = "sessions" 
     id = Column(Integer, primary_key=True) 
-    id_chat = Column(Integer) 
+    id_chat = Column(BigInteger) 
     start_date = Column(DateTime, default=datetime.utcnow())
     end_date = Column(DateTime)
     status = Column(Enum(StateEnum), default=StateEnum.Active) 
@@ -111,7 +115,7 @@ class RoundsModel(db):
     points_team = Column(Integer)
     points_bot = Column(Integer)
     round_number = Column(Integer)
-    responsible = Column(bool)
+    responsible = Column(Boolean)
 
     sessions = relation("SessionsModel", back_populates= "rounds")
  

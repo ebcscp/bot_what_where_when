@@ -41,6 +41,7 @@ class StateEnum(enum):
 class ResultEnum(enum):
     Users = "Команда игроков"
     Bot = "Бот"
+    Not = "Нет победителя"
 
 
 

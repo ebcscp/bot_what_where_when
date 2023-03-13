@@ -131,6 +131,7 @@ class GameAccessor(Database):
        
         return result
     
+
     
     async def check_sesion_status(self, id_):
         query = alselsect(SessionsModel).where(SessionsModel.id == id_)
@@ -194,7 +195,13 @@ class GameAccessor(Database):
         query = alselsect(RoundsModel).where(RoundsModel.id_session == id_session).order_by(RoundsModel.id.desc())
         result = (await self.bot.pgcli.select(query)).scalars().first()
         return result
-    
+
+
+    async def check_round_for_existence(self, session_id):
+        query = alselsect(RoundsModel).where(RoundsModel.id_session == session_id)
+        result = (await self.bot.pgcli.select(query)).scalars().first()
+        return result
+
     async def update_round_user(self, id_,points_team, round_number):
         query = update(RoundsModel).where(RoundsModel.id == id_).values(
                     points_team=points_team,

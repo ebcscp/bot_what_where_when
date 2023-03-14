@@ -25,6 +25,7 @@ class WorkerRmq:
             return   
         self.connection = await connect(url= self.config.rabbit_url)
         self.channel = await self.connection.channel()
+        #await self. channel.set_qos(prefetch_count=5) # если что убрать или увеличить
         await self.channel.declare_queue(self.config.queue_name)
         self.conect_work = True
 
@@ -32,7 +33,7 @@ class WorkerRmq:
 
         await self._setup()
         await self.channel.default_exchange.publish(
-            Message(
+            Message(    
             json.dumps(data).encode()),
             routing_key=self.config.queue_name,
             )

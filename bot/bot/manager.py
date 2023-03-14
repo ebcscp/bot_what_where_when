@@ -186,7 +186,9 @@ class BotAccessor(Database):
     async def begin_game(self, upd): 
         chat_id = get_chat_id(upd)
         from_ = get_from_(upd)
-        
+        global is_awaited
+        global tq
+        global msg_old
         
 
         check_game_session = await self.bot.store.game.get_session_in_chat(chat_id, lst_state=[StateEnum.ChoiceOfResponder,
@@ -194,9 +196,7 @@ class BotAccessor(Database):
                                                                                         StateEnum.RypleProcess])
 
         if check_game_session:
-            global is_awaited
-            global tq
-            global msg_old
+            
             msg = upd.message 
             msg_old = ''
             master_user = await self.bot.store.game.check_master_session(chat_id)
@@ -230,11 +230,12 @@ class BotAccessor(Database):
                 
                 
                 #TODO: Капитан выбирает отвечающего из списка:
-                
-                await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
+                if status.status.value == "Активная":
+                    await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                         text=f'{captain.users.first_name} выбери игрока, который даст ответ на заданный вопрос и напиши его имя в чат \n Список игроков: \n {list_user_session(all_user_session)} ')
                 
-                await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)
+                    await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)
                 
             elif status.status.value == "Выбор отвечающего" and captain.users.username == from_.username:
                 is_awaited = msg.text
@@ -245,52 +246,53 @@ class BotAccessor(Database):
                                                         text=f'{is_awaited} напиши ваш ответ!')
                     await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.RypleProcess)
                     
-                    await sleep(15)
-                    print(msg.text)
-                    print(msg_old)
-                    if msg.text == msg_old or msg_old == '':
-                        await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                                    text=f'{is_awaited} не дал ответ в течении 15 сек, поэтому бал засчитывается боту! ')
-                        round = await self.bot.store.game.get_round(master_user.sessions.id)
-                        await self.bot.store.game.update_round_bot(round.id, round.points_bot+1, round.round_number)
-                        await  self.bot.store.game.update_session_question_for_chat(tq.question.id)
+                    # await sleep(15)
+                    # print(msg.text)
+                    # print(msg_old)
+                    # if msg.text == msg_old or msg_old == '':
+                    #     await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                    #                                                 text=f'{is_awaited} не дал ответ в течении 15 сек, поэтому бал засчитывается боту! ')
+                    #     round = await self.bot.store.game.get_round(master_user.sessions.id)
+                    #     await self.bot.store.game.update_round_bot(round.id, round.points_bot+1, round.round_number)
+                    #     await  self.bot.store.game.update_session_question_for_chat(tq.question.id)
 
-                        # Проверить есть ли победитель по итогам набранных баллов, если да, то вывести победителя и закрыть сессию, нет вывести количество баллов
-                        round = await self.bot.store.game.get_round(master_user.sessions.id)
-                        if round.points_team == 6:
-                            await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                                text=f'Поздравляю вы выиграли! ')
+                    #     # Проверить есть ли победитель по итогам набранных баллов, если да, то вывести победителя и закрыть сессию, нет вывести количество баллов
+                    #     round = await self.bot.store.game.get_round(master_user.sessions.id)
+                    #     if round.points_team == 6:
+                    #         await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                    #                                             text=f'Поздравляю вы выиграли! ')
                             
-                            await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.Ended)
+                    #         await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.Ended)
                         
-                        elif round.points_bot == 6:
-                            await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                                text=f'Ой что то пошло не так и бот выиграл, не расстраивайтесь в следующий раз у вас все получится.')
+                    #     elif round.points_bot == 6:
+                    #         await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                    #                                             text=f'Ой что то пошло не так и бот выиграл, не расстраивайтесь в следующий раз у вас все получится.')
                             
-                            await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.Ended)
-                        else:
-                            await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                                text=f'Счет. \n Команда игроков: {round.points_team} \n Бот: {round.points_bot}')
+                    #         await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.Ended)
+                    #     else:
+                    #         await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                    #                                             text=f'Счет. \n Команда игроков: {round.points_team} \n Бот: {round.points_bot}')
                         
-                        status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
-                        if status.status.value != "Законченная":
-                            # создать новый раунд +1 от предыдущего
-                            round = await self.bot.store.game.get_round(master_user.sessions.id)        
-                            await self.bot.store.game.add_round(master_user.sessions.id, points_team=round.points_team, points_bot=round.points_bot, round_number=round.round_number + 1, responsible=False )
+                    #     status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
+                    #     if status.status.value != "Законченная":
+                    #         # создать новый раунд +1 от предыдущего
+                    #         round = await self.bot.store.game.get_round(master_user.sessions.id)        
+                    #         await self.bot.store.game.add_round(master_user.sessions.id, points_team=round.points_team, points_bot=round.points_bot, round_number=round.round_number + 1, responsible=False )
                             
-                            # задать вопрос
+                    #         # задать вопрос
                             
-                            tq= await self.bot.store.game.get_session_question_for_chat()
-                            await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                                    text=f'Внимание вопрос:\n \n{tq.question.title} \n \n У вас 1 минута, чтобы обсудить варианты ответа!')
-                            await sleep(60)
+                    #         tq= await self.bot.store.game.get_session_question_for_chat()
+                    #         print(tq)
+                    #         await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                    #                                                 text=f'Внимание вопрос:\n \n{tq.question.title} \n \n У вас 1 минута, чтобы обсудить варианты ответа!')
+                    #         await sleep(60)
                             
-                            # update статус сесии на ChoiceOfResponder   
-                            await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                                    text=f'{captain.users.first_name} выбери игрока, который даст ответ на заданный вопрос и напиши его никнейм в чат \n Список игроков: \n {list_user_session(all_user_session)} ')
+                    #         # update статус сесии на ChoiceOfResponder   
+                    #         await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                    #                                                 text=f'{captain.users.first_name} выбери игрока, который даст ответ на заданный вопрос и напиши его никнейм в чат \n Список игроков: \n {list_user_session(all_user_session)} ')
                             
-                            await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)
-                    msg_old=msg.text         
+                    #         await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)
+                    # msg_old=msg.text         
                             
             elif status.status.value == "Ожидание ответа" and is_awaited==from_.first_name:
 
@@ -324,7 +326,7 @@ class BotAccessor(Database):
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                         text=f'Счет. \n Команда игроков: {round.points_team} \n Бот: {round.points_bot}')
                 status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
-                if status.status.value != "Законченная":
+                if status.status.value != "Законченная": ######
                     # создать новый раунд +1 от предыдущего
                     round = await self.bot.store.game.get_round(master_user.sessions.id)        
                     await self.bot.store.game.add_round(master_user.sessions.id, points_team=round.points_team, points_bot=round.points_bot, round_number=round.round_number + 1, responsible=False )
@@ -334,13 +336,15 @@ class BotAccessor(Database):
                     tq= await self.bot.store.game.get_session_question_for_chat()
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                             text=f'Внимание вопрос:\n \n{tq.question.title} \n \n У вас 1 минута, чтобы обсудить варианты ответа!')
-                    await sleep(60)
                     
+                    await sleep(60)
+                    status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
+                    if status.status.value == "Ожидание ответа": 
                     # update статус сесии на ChoiceOfResponder   
-                    await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                        await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                             text=f'{captain.users.first_name} выбери игрока, который даст ответ на заданный вопрос и напиши его никнейм в чат \n Список игроков: \n {list_user_session(all_user_session)} ')
                     
-                    await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)
+                        await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)
                 
     async def bot_stop_game(self, upd): 
         chat_id = get_chat_id(upd)

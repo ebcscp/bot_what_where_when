@@ -1,8 +1,8 @@
-"""add init table
+"""add initial table
 
-Revision ID: 85bd9d7e777e
+Revision ID: bc44afd2808f
 Revises: 
-Create Date: 2023-03-12 03:19:50.949494
+Create Date: 2023-03-15 14:55:18.991105
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '85bd9d7e777e'
+revision = 'bc44afd2808f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,7 +29,7 @@ def upgrade() -> None:
     sa.Column('start_date', sa.DateTime(), nullable=True),
     sa.Column('end_date', sa.DateTime(), nullable=True),
     sa.Column('status', sa.Enum('Active', 'Ended', 'Established', 'ChoiceOfResponder', 'RypleProcess', 'Interrupted', name='stateenum'), nullable=True),
-    sa.Column('result', sa.Enum('Users', 'Bot', name='resultenum'), nullable=True),
+    sa.Column('result', sa.Enum('Users', 'Bot', 'Not', name='resultenum'), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',

@@ -140,11 +140,12 @@ class GameAccessor(Database):
         return result
     
     
-    async def check_master_session(self, chat_id):
+    async def check_master_session(self, chat_id, session_id):
         query = alselsect(SessionUsersModel).join(SessionsModel).where(
             and_(
                 SessionUsersModel.is_creator == True,
-                SessionsModel.id_chat == chat_id
+                SessionsModel.id_chat == chat_id,
+                SessionUsersModel.sessions_id == session_id
             )).options(joinedload(SessionUsersModel.users).options(joinedload(UsersModel.user_sessions))) \
             .options(joinedload(SessionUsersModel.sessions).options(joinedload(SessionsModel.user_sessions)))
 

@@ -242,12 +242,14 @@ class BotAccessor(Database):
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                         text=f'{is_awaited} напиши ваш ответ!')
                     await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.RypleProcess)
+                    round1 = await self.bot.store.game.get_round(master_user.sessions.id)
                     
                     #Проверка спустя 15 сек изменился лим статус игровой сессии
                     await sleep(15)
+                    round2 = await self.bot.store.game.get_round(master_user.sessions.id)
                     check_game_session = await self.bot.store.game.get_session_in_chat(chat_id, lst_state=[StateEnum.RypleProcess])
 
-                    if check_game_session: 
+                    if check_game_session and round1.id == round2.id: 
                         await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                                             text=f'{is_awaited} не дал ответ в течении 15 сек, поэтому балл засчитывается боту! ')
                         round = await self.bot.store.game.get_round(master_user.sessions.id)
@@ -361,13 +363,15 @@ class BotAccessor(Database):
                 round = await self.bot.store.game.get_round(master_user.sessions.id)
                 if round.points_team == 6:
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                        text=f'Поздравляю вы выиграли! ')
+                                                        text=f'Поздравляю вы выиграли! \n'\
+                                                            f'Счет. \n Команда игроков: {round.points_team} \n Бот: {round.points_bot}')
                     
                     await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.Ended)
                 
                 elif round.points_bot == 6:
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                        text=f'Ой что то пошло не так и бот выиграл, не расстраивайтесь в следующий раз у вас все получится.')
+                                                        text=f'Ой что то пошло не так и бот выиграл, не расстраивайтесь в следующий раз у вас все получится. \n'\
+                                                             f'Счет. \n Команда игроков: {round.points_team} \n Бот: {round.points_bot}')
                     
                     await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.Ended)
                 else:
@@ -402,7 +406,7 @@ class BotAccessor(Database):
         session = await self.bot.store.game.get_session_not_in_lst_state(chat_id=chat_id,
                                                                           lst_state=[StateEnum.Ended,
                                                                                      StateEnum.Interrupted])  
-       
+        round = await self.bot.store.game.get_round(session.id)
         if session:
             master_user = await self.bot.store.game.check_master_session(chat_id, session.id)
             if master_user.users.tg_id == from_.id:
@@ -420,7 +424,8 @@ class BotAccessor(Database):
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                          text=f"{BotMsg.StopByGod.value} "
                                                               f"{master_user.users.first_name} \n"
-                                                              f"Победила команда игроков!") 
+                                                              f"Победила команда игроков! \n" \
+                                                              f'Счет. \n Команда игроков: {round.points_team} \n Бот: {round.points_bot}') 
 
                 elif result.points_team == 0 and result.points_bot == 0:
                     await self.bot.store.game.update_status_session_end(master_user.sessions.id, StateEnum.Ended, end_date=datetime.utcnow(), result=ResultEnum.Not)
@@ -434,7 +439,8 @@ class BotAccessor(Database):
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                          text=f"{BotMsg.StopByGod.value} "
                                                               f"{master_user.users.first_name} \n"
-                                                              f"Победил бот!") 
+                                                              f"Победил бот! \n" \
+                                                              f'Счет. \n Команда игроков: {round.points_team} \n Бот: {round.points_bot}'  ) 
                     
                 
             else:

@@ -49,7 +49,8 @@ class BotAccessor(Database):
 
         check_game_session = await self.bot.store.game.get_session_in_chat(chat_id, lst_state=[StateEnum.ChoiceOfResponder,
                                                                                         StateEnum.Active,
-                                                                                        StateEnum.RypleProcess])
+                                                                                        StateEnum.RypleProcess,
+                                                                                        StateEnum.Established])
 
         if check_game_session:
             await self.send_keyboard(chat_id=chat_id, text=BotMsg.GameSessionActive.value)
@@ -187,7 +188,7 @@ class BotAccessor(Database):
         from_ = get_from_(upd)
         global is_awaited
         global tq
-        global msg_old
+
         
 
         check_game_session = await self.bot.store.game.get_session_in_chat(chat_id, lst_state=[StateEnum.ChoiceOfResponder,
@@ -196,7 +197,6 @@ class BotAccessor(Database):
 
         if check_game_session:           
             msg = upd.message 
-            msg_old = ''
             master_user = await self.bot.store.game.check_master_session(chat_id, check_game_session.id)
            
             captain = await self.bot.store.game.check_user_session_captain(chat_id)
@@ -222,13 +222,19 @@ class BotAccessor(Database):
                 #TODO:Задаем вопрос в чат
                 tq = await self.bot.store.game.get_session_question_for_chat()
                 await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                        text=f'Внимание вопрос:\n \n{tq.question.title}\n \n (У вас 1 минута, чтобы обсудить варианты ответа!)')
+                                                        text=f'Внимание вопрос:\n \n{tq.question.title}\n \n (У вас 1 минута, чтобы обсудить варианты ответа!)',
+                                                        reply_markup=InlineKeyboardMarkup(
+                                                               inline_keyboard=[BotButtons.ErlyBtn.value]))
+
+                await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.Discussion) 
+                round1 = await self.bot.store.game.get_round(master_user.sessions.id)                                       
                 await sleep(60)
                 
                 
                 #TODO: Капитан выбирает отвечающего из списка:
+                round2 = await self.bot.store.game.get_round(master_user.sessions.id)
                 status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
-                if status.status.value == "Активная":
+                if status.status.value == "Обсуждение вопроса" and round1.id == round2.id:
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                         text=f'{captain.users.first_name} выбери игрока, который даст ответ на заданный вопрос и напиши его имя в чат \n Список игроков: \n {list_user_session(all_user_session)} ')
                 
@@ -283,11 +289,17 @@ class BotAccessor(Database):
                             # задать вопроc           
                             tq= await self.bot.store.game.get_session_question_for_chat()
                             await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                                    text=f'Внимание вопрос:\n \n{tq.question.title} \n \n У вас 1 минута, чтобы обсудить варианты ответа!')
+                                                                    text=f'Внимание вопрос:\n \n{tq.question.title} \n \n У вас 1 минута, чтобы обсудить варианты ответа!',
+                                                                    reply_markup=InlineKeyboardMarkup(
+                                                                        inline_keyboard=[BotButtons.ErlyBtn.value]))
                             
+                            await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.Discussion) 
+                            round1 = await self.bot.store.game.get_round(master_user.sessions.id) 
+
                             await sleep(60)
+                            round2 = await self.bot.store.game.get_round(master_user.sessions.id) 
                             status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
-                            if status.status.value == "Ожидание ответа":
+                            if status.status.value == "Обсуждение вопроса" and round1.id == round2.id:
                                 # update статус сесии на ChoiceOfResponder   
                                 await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                                         text=f'{captain.users.first_name} выбери игрока, который даст ответ на заданный вопрос и напиши его никнейм в чат \n Список игроков: \n {list_user_session(all_user_session)} ')
@@ -338,17 +350,39 @@ class BotAccessor(Database):
                     
                     tq= await self.bot.store.game.get_session_question_for_chat()
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                            text=f'Внимание вопрос:\n \n{tq.question.title} \n \n У вас 1 минута, чтобы обсудить варианты ответа!')
-                    
+                                                            text=f'Внимание вопрос:\n \n{tq.question.title} \n \n У вас 1 минута, чтобы обсудить варианты ответа!',
+                                                            reply_markup=InlineKeyboardMarkup(
+                                                               inline_keyboard=[BotButtons.ErlyBtn.value]) 
+                                                                    )
+                    await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.Discussion)                                         
+                    round1 = await self.bot.store.game.get_round(master_user.sessions.id) 
+
                     await sleep(60) #################################ПРОВЕРИТЬ!!!
+                    round2 = await self.bot.store.game.get_round(master_user.sessions.id) 
                     status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
-                    if status.status.value == "Ожидание ответа": 
+                    if status.status.value == "Обсуждение вопроса" and round1.id == round2.id: 
                     # update статус сесии на ChoiceOfResponder   
                         await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                             text=f'{captain.users.first_name} выбери игрока, который даст ответ на заданный вопрос и напиши его никнейм в чат \n Список игроков: \n {list_user_session(all_user_session)} ')
                     
-                        await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)
-                
+                        await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)      
+
+
+    async def erly_response(self, upd):
+        chat_id = get_chat_id(upd)
+        from_ = get_from_(upd)
+        check_game_session = await self.bot.store.game.get_session_in_chat(chat_id, lst_state=[StateEnum.Discussion])
+        master_user = await self.bot.store.game.check_master_session(chat_id, check_game_session.id)
+        captain = await self.bot.store.game.check_user_session_captain(chat_id)
+        all_user_session = await self.bot.store.game.check_all_user_session(master_user.sessions.id)
+        if check_game_session and captain.users.username == from_.username:
+            await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                                                            text=f'{captain.users.first_name} выбери игрока, который даст ответ на заданный вопрос и напиши его никнейм в чат \n Список игроков: \n {list_user_session(all_user_session)} ')
+                    
+            await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)
+
+
+
     async def bot_stop_game(self, upd): 
         chat_id = get_chat_id(upd)
         from_ = get_from_(upd)      

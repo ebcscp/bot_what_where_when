@@ -37,11 +37,13 @@ class StateEnum(enum):
     ChoiceOfResponder = "Выбор отвечающего"
     RypleProcess = "Ожидание ответа"
     Interrupted = "Прерванная"
+    Discussion = "Обсуждение вопроса"
 
 class ResultEnum(enum):
     Users = "Команда игроков"
     Bot = "Бот"
     Not = "Нет победителя"
+
 
 
 

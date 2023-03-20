@@ -55,6 +55,8 @@ class CallBackData(Enum):
     IJoin = "/IJoin"
     WeReady = "/WeReady"
     Go = "/Go"
+    Erly = "/Erly"
+
 
 
 class BotButtons(Enum):
@@ -63,3 +65,4 @@ class BotButtons(Enum):
     Keyboard = [[Commands.Start.value], [Commands.Stop.value]]
     JoinBtns = [InlineKeyboardButton("Я участвую!", callback_data=CallBackData.IJoin.value),
                 InlineKeyboardButton("Завершить набор", callback_data=CallBackData.WeReady.value)]
+    ErlyBtn = [InlineKeyboardButton("Досрочный ответ!", callback_data=CallBackData.Erly.value)]            

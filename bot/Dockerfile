@@ -16,5 +16,5 @@ COPY alembic.ini config.yml dataclass_config.py dataclasses_models.py main_confi
 
 USER bot
 
-# SHELL  ["bin/bash", "-c", "python -m alembic revision --autogenerate -m 'Init table'"]
+SHELL  ["bin/bash", "-c", "python -m alembic revision --autogenerate -m 'Add init table'"]
 # SHELL ["/bin/bash", "-c", "python -m alembic upgrade head"]

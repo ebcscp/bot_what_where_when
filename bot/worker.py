@@ -33,7 +33,6 @@ class Worker:
                 file = await self.store.tg_client.get_file(upd.message.document.file_id)
                 file = await self.store.tg_client.get_file(upd.message.document.file_id)
                 url = f'{self.config.tg_config.api_path}/file/bot{self.config.tg_config.token}/{file.file_path}'
-                print(url)
                 await self.store.manager._get_admin_worker(url) 
             else:
                 await self.store.manager.begin_game(upd)     
@@ -48,7 +47,9 @@ class Worker:
         elif upd.callback_query and upd.callback_query.data == CallBackData.WeReady.value:
             await self.store.manager.ready_game(upd=upd)
         elif upd.callback_query and upd.callback_query.data == CallBackData.Go.value:
-            await self.store.manager.begin_game(upd=upd)         
+            await self.store.manager.begin_game(upd=upd)
+        elif upd.callback_query and upd.callback_query.data == CallBackData.Erly.value:
+            await self.store.manager.erly_response(upd=upd)             
           
         #await self.store.tg_client.send_message(upd.message.chat.id, upd.message.text) 
         

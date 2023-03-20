@@ -98,6 +98,18 @@ class GameAccessor(Database):
 
         us = (await self.bot.pgcli.select(query)).scalars().first()
         return us
+
+    async def check_user_session_id_captain(self, chat_id, session_id):
+        query = alselsect(SessionUsersModel).join(SessionsModel).where(
+            and_(
+                SessionUsersModel.is_captain == True,
+                SessionsModel.id_chat == chat_id,
+                SessionsModel.id == session_id
+            )).options(joinedload(SessionUsersModel.users).options(joinedload(UsersModel.user_sessions))) \
+            .options(joinedload(SessionUsersModel.sessions).options(joinedload(SessionsModel.user_sessions)))
+
+        us = (await self.bot.pgcli.select(query)).scalars().first()
+        return us
     
     async def update_status_session(self, id_, status ):
         update_query = update(SessionsModel).where(SessionsModel.id == id_).values(status=status)

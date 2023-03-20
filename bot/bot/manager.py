@@ -50,7 +50,8 @@ class BotAccessor(Database):
         check_game_session = await self.bot.store.game.get_session_in_chat(chat_id, lst_state=[StateEnum.ChoiceOfResponder,
                                                                                         StateEnum.Active,
                                                                                         StateEnum.RypleProcess,
-                                                                                        StateEnum.Established])
+                                                                                        StateEnum.Established,
+                                                                                        StateEnum.Discussion])
 
         if check_game_session:
             await self.send_keyboard(chat_id=chat_id, text=BotMsg.GameSessionActive.value)
@@ -373,7 +374,8 @@ class BotAccessor(Database):
         from_ = get_from_(upd)
         check_game_session = await self.bot.store.game.get_session_in_chat(chat_id, lst_state=[StateEnum.Discussion])
         master_user = await self.bot.store.game.check_master_session(chat_id, check_game_session.id)
-        captain = await self.bot.store.game.check_user_session_captain(chat_id)
+        captain = await self.bot.store.game.check_user_session_id_captain(chat_id, check_game_session.id)
+        
         all_user_session = await self.bot.store.game.check_all_user_session(master_user.sessions.id)
         if check_game_session and captain.users.username == from_.username:
             await self.bot.store.tg_client.send_message(chat_id=chat_id,

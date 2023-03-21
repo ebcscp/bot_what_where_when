@@ -1,3 +1,7 @@
+from telegram import InlineKeyboardButton
+
+def list_user_session_awaited(players: list):
+    return [InlineKeyboardButton(v.first_name, callback_data=v.first_name)  for v in players]
 
 def list_user_session(players: list):
     return " ".join([f"{c}. {v.first_name} \n" for c, v in enumerate(players, start=1)])

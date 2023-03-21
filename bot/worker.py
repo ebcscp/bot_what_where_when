@@ -50,7 +50,8 @@ class Worker:
             await self.store.manager.begin_game(upd=upd)
         elif upd.callback_query and upd.callback_query.data == CallBackData.Erly.value:
             await self.store.manager.erly_response(upd=upd)             
-          
+        elif upd.my_chat_member: #для кнопок с пользаками
+             await self.store.manager.begin_game(upd)  
         #await self.store.tg_client.send_message(upd.message.chat.id, upd.message.text) 
         
             

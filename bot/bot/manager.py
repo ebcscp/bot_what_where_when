@@ -246,7 +246,7 @@ class BotAccessor(Database):
                 
             elif status.status.value == "Выбор отвечающего" and captain.users.username == from_.username:
                 #round_is_awaited = await self.bot.store.game.get_round(master_user.sessions.id)
-                msg = from_.first
+                msg = from_.first_name
                 lst_user = [v.first_name for v in all_user_session]
                 if msg in lst_user :
                     round1 = await self.bot.store.game.get_round(master_user.sessions.id)

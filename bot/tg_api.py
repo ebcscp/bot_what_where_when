@@ -4,7 +4,7 @@ import typing
 import aiohttp
 from marshmallow.exceptions import ValidationError
 
-from models import  Message, SendMessageResponse, GetFileResponse, File
+from dataclasses_models import  Message, SendMessageResponse, GetFileResponse, File
 
 if typing.TYPE_CHECKING:
     from worker import Worker
@@ -30,12 +30,15 @@ class TgClient:
         except JSONDecodeError:
             raise TgClientError
 
-    async def send_message(self, chat_id: int, text: str) -> Message:
+    async def send_message(self, chat_id: int, text: str, reply_markup=None) -> Message:
         url = self.get_base_path() + '/sendMessage'
         payload = {
             'chat_id': chat_id,
             'text': text
         }
+        if reply_markup:
+            payload["reply_markup"] = reply_markup.to_json()
+            
         async with aiohttp.ClientSession() as session:
             async with session.post(url, json=payload) as resp:
                 res_dict = await self._handle_response(resp)

@@ -1,4 +1,4 @@
-from dataclass_config import BaseConfig, WorkerConfig, Config,  TgConfig
+from dataclass_config import BaseConfig, WorkerConfig, Config,  TgConfig, Game 
 import typing
 if typing.TYPE_CHECKING:
     from worker import Worker
@@ -10,8 +10,9 @@ def worker_config(bot:"Worker",config_path: str) -> Config:
     bot.config = Config(
         worker_config=WorkerConfig(
             rabbit_url=raw_config["rabbitmq"]["rabbit_url"],
-            queue_name=raw_config["rabbitmq"]["queue_name"],   
-          
+            queue_name=raw_config["rabbitmq"]["queue_name"],
+            bot_id=raw_config["bot"]["id"],
+            chat_id=raw_config["bot"]["chat_id"],            
         ),
         base_config=BaseConfig(
             base_url=raw_config["database"]["base_url"],
@@ -19,7 +20,11 @@ def worker_config(bot:"Worker",config_path: str) -> Config:
         tg_config=TgConfig(
             token=raw_config["bot"]["token"],
             api_path=raw_config["bot"]["api_path"], 
-        ) 
+        ),
+        game=Game(
+            user=raw_config["game"]["user"],
+            questions=raw_config["game"]["questions"], 
+        ),
     )    
      
 

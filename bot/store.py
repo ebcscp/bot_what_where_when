@@ -10,12 +10,14 @@ class Store:
     def __init__(self, bot: "Worker"):
 
         from admin.accessor import AdminAccessor
-        from manager import TgApiAccessor
+        from bot.manager import BotAccessor
         from tg_api import TgClient
+        from game.accessor import GameAccessor
 
         self.admins = AdminAccessor(bot)
-        self.manager = TgApiAccessor(bot)
+        self.manager = BotAccessor(bot)
         self.tg_client = TgClient(bot)
+        self.game = GameAccessor(bot)
 
 def setup_store(bot: "Worker"):
     bot.pgcli = Database(bot)

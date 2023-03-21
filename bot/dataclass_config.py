@@ -5,6 +5,8 @@ from dataclasses import dataclass
 class WorkerConfig:
     rabbit_url: str
     queue_name: str
+    bot_id: int
+    chat_id: int
 
 
 @dataclass
@@ -17,7 +19,13 @@ class TgConfig:
     api_path: str
 
 @dataclass
+class Game:
+    user: str
+    questions: str
+    
+@dataclass
 class Config:
     worker_config: WorkerConfig = None
     base_config: BaseConfig = None 
-    tg_config: TgConfig = None   
+    tg_config: TgConfig = None 
+    game: Game = None  

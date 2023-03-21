@@ -16,11 +16,18 @@ class Poller:
         
         offset = 0
         while self.is_running:
-            updates = await self.tg_client.get_updates_in_objects(offset=offset, timeout=60)
-            for update in updates:
-                offset = update.update_id + 1
-                data = UpdateObj.Schema().dump(update)
-                await self.rabbit_client.put(data)
+            try:
+                updates = await self.tg_client.get_updates_in_objects(offset=offset, timeout=60)
+                
+                for update in updates:
+                    print(update)
+                    offset = update.update_id + 1
+                    data = UpdateObj.Schema().dump(update)
+                    await self.rabbit_client.put(data)
+            except Exception as e:
+                update = await self.tg_client.get_updates(offset=offset, timeout=5)
+                
+
 
     async def start(self):
         

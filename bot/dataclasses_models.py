@@ -9,8 +9,8 @@ from marshmallow import Schema, EXCLUDE
 class MessageFrom:
     id: int
     first_name: str
-    last_name: Optional[str]
-    username: str
+    last_name: Optional[str] = None
+    username: Optional[str] = None
 
     class Meta:
         unknown = EXCLUDE
@@ -21,9 +21,23 @@ class Chat:
     id: int
     type: str
 
+
     class Meta:
         unknown = EXCLUDE
+@dataclass
+class PrivateChat(Chat):
+    id: int
+    first_name: str
+    last_name: str
+    username: str
 
+
+@dataclass
+class GroupChat(Chat):
+    id: int
+    type: str
+    title: str
+    
 @dataclass
 class File:
     file_id: str
@@ -40,17 +54,53 @@ class Message:
     message_id: int
     from_: MessageFrom = field(metadata={'data_key': 'from'})
     chat: Chat
+    date: int
     text: Optional[str]
     document: Optional[File] = None
 
     class Meta:
         unknown = EXCLUDE
+@dataclass
+class User:
+    id: int
+    first_name: str
+    #last_name: str
 
+    class Meta:
+        unknown = EXCLUDE
 
+@dataclass
+class NewChatMember:
+    user: User
+    status: Optional[str] = None
+
+    class Meta:
+        unknown = EXCLUDE
+
+@dataclass
+class MyChatMember:
+    chat: Chat
+    from_: MessageFrom= field(metadata={'data_key':'from'})
+    new_chat_member: NewChatMember
+
+    class Meta:
+        unknown = EXCLUDE
+        
+@dataclass
+class CallbackQuery:
+    id: int
+    from_: MessageFrom= field(metadata={'data_key':'from'})
+    message: Message
+    data: str
+
+    class Meta:
+        unknown = EXCLUDE
 @dataclass
 class UpdateObj:
     update_id: int
-    message: Message
+    message: Optional[Message] = None
+    my_chat_member: Optional[MyChatMember] = None
+    callback_query: Optional[CallbackQuery] = None
 
     Schema: ClassVar[Type[Schema]] = Schema
 

@@ -62,8 +62,6 @@ services:
       PGADMIN_DEFAULT_EMAIL: "ebcscp2@yandex.ru"
       PGADMIN_DEFAULT_PASSWORD: "pgadminpass"
       PGADMIN_CONFIG_SERVER_MODE: "False"
-    # volumes:
-    #   - /multy_serv_vol/pgadmin:/var/lib/pgadmin
     ports:
       - "5050:80"
     restart: unless-stopped
@@ -96,19 +94,17 @@ services:
         timeout: 10s
         retries: 5
 
-  # worker:
-  #   container_name: worker
-  #   build: bot/
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #     # postgres:
-  #     #     condition: service_healthy  
-  #   #volumes:
-  #    # - /multy_serv_vol/configs:/home/worker/configs
-  #   command: python main.py
-  #   networks:
-  #     - my-bridge    
+  worker:
+    container_name: worker
+    build: bot/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy       
+    command: sh -c "cd ./ && python -m alembic revision --autogenerate -m 'Add init table' && python -m alembic upgrade head && python main.py"
+    networks:
+      - my-bridge    
       
   poller:
     container_name: poller
@@ -116,32 +112,15 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-        # postgres:
-        #   condition: service_healthy  
-    #volumes:
-    #  - /multy_serv_vol/configs:/home/poller/configs    
-    # export PYTHONPATH=home/poller &&
     command: python main.py
     networks:
       - my-bridge 
-
-  # worker:
-  #   container_name: worker
-  #   build: worker/
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #     # postgres:
-  #     #     condition: service_healthy  
-  #   #volumes:
-  #    # - /multy_serv_vol/configs:/home/worker/configs
-  #   command: python main.py
-  #   networks:
-  #     - my-bridge       
-
+      
 networks:
   my-bridge:
     driver: bridge
     ipam:
       config:
-        - subnet: 192.168.45.0/24
+        - subnet: 192.168.46.0/24     
+
+

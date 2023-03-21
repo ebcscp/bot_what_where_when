@@ -52,7 +52,9 @@ class TgClient:
         print(res_dict)
         try:
             gu_response: GetUpdatesResponse = GetUpdatesResponse.Schema().load(res_dict)
-        except ValidationError:    
+            print(gu_response)
+        except ValidationError as e: 
+            print(e)   
             raise TgClientError
         return gu_response.result
 

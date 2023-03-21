@@ -1,0 +1,5 @@
+marshmallow==3.19.0
+aiohttp==3.8.3
+marshmallow_dataclass==8.5.11
+aio_pika==6.8.0
+pyyaml==6.0

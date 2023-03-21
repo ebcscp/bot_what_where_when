@@ -187,8 +187,8 @@ class BotAccessor(Database):
     async def begin_game(self, upd): 
         chat_id = get_chat_id(upd)
         from_ = get_from_(upd)
-        global is_awaited
-        global tq
+        #global is_awaited
+        # global tq
 
         
 
@@ -204,6 +204,7 @@ class BotAccessor(Database):
 
             status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
             all_user_session = await self.bot.store.game.check_all_user_session(master_user.sessions.id)
+            is_awaited = await self.bot.store.game.get_round_user_awaited(master_user.sessions.id)
             
             if master_user.users.tg_id == from_.id and status.status.value == "Активная":
                 
@@ -221,7 +222,7 @@ class BotAccessor(Database):
                 await self.bot.store.game.add_round(master_user.sessions.id, round_number=1 )
                 
                 #TODO:Задаем вопрос в чат
-                tq = await self.bot.store.game.get_session_question_for_chat()
+                tq = await self.bot.store.game.get_session_question_for_chat(master_user.sessions.id)
                 await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                         text=f'Внимание вопрос:\n \n{tq.question.title}\n \n (У вас 1 минута, чтобы обсудить варианты ответа!)',
                                                         reply_markup=InlineKeyboardMarkup(
@@ -242,23 +243,29 @@ class BotAccessor(Database):
                     await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder)
                 
             elif status.status.value == "Выбор отвечающего" and captain.users.username == from_.username:
-                is_awaited = msg.text
-                
+                #round_is_awaited = await self.bot.store.game.get_round(master_user.sessions.id)
+                msg = msg.text
                 lst_user = [v.first_name for v in all_user_session]
-                if is_awaited in lst_user :
-                    await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                        text=f'{is_awaited} напиши ваш ответ!')
-                    await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.RypleProcess)
+                if msg in lst_user :
                     round1 = await self.bot.store.game.get_round(master_user.sessions.id)
+
+                    await self.bot.store.game.update_round_user_awaited(round1.id, msg)
+                    is_awaited = await self.bot.store.game.get_round_user_awaited(master_user.sessions.id)
+
+                    await self.bot.store.tg_client.send_message(chat_id=chat_id,
+                                                        text=f'{is_awaited.is_awaited} напиши ваш ответ!')
+                    await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.RypleProcess)
+                    
                     
                     #Проверка спустя 15 сек изменился лим статус игровой сессии
                     await sleep(15)
                     round2 = await self.bot.store.game.get_round(master_user.sessions.id)
                     check_game_session = await self.bot.store.game.get_session_in_chat(chat_id, lst_state=[StateEnum.RypleProcess])
-
+                    tq = await self.bot.store.game.get_session_question_for_chat(master_user.sessions.id)
                     if check_game_session and round1.id == round2.id: 
+                        is_awaited = await self.bot.store.game.get_round_user_awaited(master_user.sessions.id)
                         await self.bot.store.tg_client.send_message(chat_id=chat_id,
-                                                                            text=f'{is_awaited} не дал ответ в течении 15 сек, поэтому балл засчитывается боту! ')
+                                                                            text=f'{is_awaited.is_awaited} не дал ответ в течении 15 сек, поэтому балл засчитывается боту! ')
                         round = await self.bot.store.game.get_round(master_user.sessions.id)
                         await self.bot.store.game.update_round_bot(round.id, round.points_bot+1, round.round_number)
                         await  self.bot.store.game.update_session_question_for_chat(tq.question.id)
@@ -288,7 +295,7 @@ class BotAccessor(Database):
                             await self.bot.store.game.add_round(master_user.sessions.id, points_team=round.points_team, points_bot=round.points_bot, round_number=round.round_number + 1, responsible=False )
                             
                             # задать вопроc           
-                            tq= await self.bot.store.game.get_session_question_for_chat()
+                            tq = await self.bot.store.game.get_session_question_for_chat(master_user.sessions.id)
                             await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                                     text=f'Внимание вопрос:\n \n{tq.question.title} \n \n У вас 1 минута, чтобы обсудить варианты ответа!',
                                                                     reply_markup=InlineKeyboardMarkup(
@@ -307,9 +314,9 @@ class BotAccessor(Database):
                                 
                                 await self.bot.store.game.update_status_session(master_user.sessions.id, StateEnum.ChoiceOfResponder) 
 
-            elif status.status.value == "Ожидание ответа" and is_awaited==from_.first_name:
+            elif status.status.value == "Ожидание ответа" and is_awaited.is_awaited==from_.first_name:
 
-                
+                tq = await self.bot.store.game.get_session_question_for_chat(master_user.sessions.id)
                 round = await self.bot.store.game.get_round(master_user.sessions.id)
                 
                 answer = await self.bot.store.game.get_answer(tq.question.id)
@@ -321,7 +328,7 @@ class BotAccessor(Database):
                 else:
                     await self.bot.store.game.update_round_bot(round.id, round.points_bot+1, round.round_number)
                 
-                await  self.bot.store.game.update_session_question_for_chat(tq.question.id)
+                await  self.bot.store.game.update_session_question_for_chat(tq.question.id) #####ПРОВЕРИТЬ!
                 # Проверить есть ли победитель по итогам набранных баллов, если да, то вывести победителя и закрыть сессию, нет вывести количество баллов
                 round = await self.bot.store.game.get_round(master_user.sessions.id)
                 if round.points_team == 6:
@@ -349,7 +356,7 @@ class BotAccessor(Database):
                     
                     # задать вопрос
                     
-                    tq= await self.bot.store.game.get_session_question_for_chat()
+                    tq = await self.bot.store.game.get_session_question_for_chat(master_user.sessions.id)
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,
                                                             text=f'Внимание вопрос:\n \n{tq.question.title} \n \n У вас 1 минута, чтобы обсудить варианты ответа!',
                                                             reply_markup=InlineKeyboardMarkup(

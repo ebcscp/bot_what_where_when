@@ -55,6 +55,7 @@ class Round:
     points_bot: int
     round_number: int
     responsible: bool
+    is_awaited: str
 
 @dataclass
 class SessionQuestion:
@@ -119,6 +120,7 @@ class RoundsModel(db):
     points_bot = Column(Integer)
     round_number = Column(Integer)
     responsible = Column(Boolean)
+    is_awaited = Column(VARCHAR(200))
 
     sessions = relation("SessionsModel", back_populates= "rounds")
  

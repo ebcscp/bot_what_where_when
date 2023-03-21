@@ -185,8 +185,12 @@ class GameAccessor(Database):
             await self.bot.pgcli.insert(query) 
         return us    
     
-    async def get_session_question_for_chat(self):
-        query = alselsect(SessionQuestionModel).join(QuestionModel).where(SessionQuestionModel.is_answerd == False)\
+    async def get_session_question_for_chat(self, id_session):
+        query = alselsect(SessionQuestionModel).join(QuestionModel).where(
+            and_(
+            SessionQuestionModel.is_answerd == False,
+            SessionQuestionModel.id_session == id_session)
+            )\
             .options(joinedload(SessionQuestionModel.question).options(joinedload(QuestionModel.session_question))) \
             .options(joinedload(SessionQuestionModel.sessions).options(joinedload(SessionsModel.session_question))) \
             .order_by().limit(1)
@@ -236,7 +240,20 @@ class GameAccessor(Database):
         result = await self.bot.pgcli.update(query)
         print(result)
         return result
-    
+
+    async def update_round_user_awaited(self, id_, is_awaited):
+        query = update(RoundsModel).where(RoundsModel.id == id_).values(
+                    is_awaited=is_awaited                 
+            )
+        result = await self.bot.pgcli.update(query)
+        print(result)
+        return result
+
+    async def get_round_user_awaited(self, id_session):
+        query = alselsect(RoundsModel).where(RoundsModel.id_session == id_session).order_by(RoundsModel.id.desc())
+        result = (await self.bot.pgcli.select(query)).scalars().first()
+        return result
+
     async def get_answer(self, question_id):
         query = alselsect(AnswerModel).where(AnswerModel.question_id == question_id)
         result = await self.bot.pgcli.select(query)

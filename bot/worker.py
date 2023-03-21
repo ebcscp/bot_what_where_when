@@ -29,7 +29,7 @@ class Worker:
             elif upd.message.text == Commands.Stop.value:
                 await self.store.manager.bot_stop_game(upd)
                       
-            elif upd.message.document and upd.message.chat.id == self.config.worker_config.bot_id:
+            elif upd.message.document and upd.message.chat.id == self.config.worker_config.chat_id:
                 file = await self.store.tg_client.get_file(upd.message.document.file_id)
                 file = await self.store.tg_client.get_file(upd.message.document.file_id)
                 url = f'{self.config.tg_config.api_path}/file/bot{self.config.tg_config.token}/{file.file_path}'

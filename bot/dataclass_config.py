@@ -6,6 +6,7 @@ class WorkerConfig:
     rabbit_url: str
     queue_name: str
     bot_id: int
+    chat_id: int
 
 
 @dataclass

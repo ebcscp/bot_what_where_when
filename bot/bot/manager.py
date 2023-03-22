@@ -10,7 +10,7 @@ from database.database import Database
 from dataclasses_models import UpdateObj
 from bot.enum_blanks import BotMsg, BotButtons, StatusAddBot
 from game.models import Answer, Question, StateEnum, ResultEnum
-from bot.utils import list_user_session, get_chat_id, get_from_, list_user_session_awaited
+from bot.utils import list_user_session, get_chat_id, get_from_, list_user_session_awaited, get_call_msg
 
 
 class BotAccessor(Database):
@@ -186,6 +186,7 @@ class BotAccessor(Database):
     async def begin_game(self, upd): 
         chat_id = get_chat_id(upd)
         from_ = get_from_(upd)
+        call_msg = get_call_msg(upd)
         #global is_awaited
         # global tq
 
@@ -199,7 +200,7 @@ class BotAccessor(Database):
             msg = upd.message 
             master_user = await self.bot.store.game.check_master_session(chat_id, check_game_session.id)
            
-            captain = await self.bot.store.game.check_user_session_captain(chat_id)
+            captain = await self.bot.store.game.check_user_session_captain(chat_id, master_user.sessions.id)
 
             status =  await self.bot.store.game.check_sesion_status(master_user.sessions.id)
             all_user_session = await self.bot.store.game.check_all_user_session(master_user.sessions.id)
@@ -246,12 +247,12 @@ class BotAccessor(Database):
                 
             elif status.status.value == "Выбор отвечающего" and captain.users.username == from_.username:
                 #round_is_awaited = await self.bot.store.game.get_round(master_user.sessions.id)
-                msg = from_.first_name
+                call_ms = call_msg
                 lst_user = [v.first_name for v in all_user_session]
-                if msg in lst_user :
+                if call_ms in lst_user :
                     round1 = await self.bot.store.game.get_round(master_user.sessions.id)
 
-                    await self.bot.store.game.update_round_user_awaited(round1.id, msg)
+                    await self.bot.store.game.update_round_user_awaited(round1.id, call_ms)
                     is_awaited = await self.bot.store.game.get_round_user_awaited(master_user.sessions.id)
 
                     await self.bot.store.tg_client.send_message(chat_id=chat_id,

@@ -11,3 +11,6 @@ def get_chat_id(upd):
 
 def get_from_(upd):
     return upd.callback_query.from_ if upd.callback_query else upd.message.from_
+
+def get_call_msg(upd):
+    return upd.callback_query.data  if upd.callback_query else None

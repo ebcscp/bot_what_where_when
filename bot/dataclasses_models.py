@@ -91,7 +91,7 @@ class CallbackQuery:
     id: int
     from_: MessageFrom= field(metadata={'data_key':'from'})
     message: Message
-    data: str
+    data: Optional[str] = None
 
     class Meta:
         unknown = EXCLUDE

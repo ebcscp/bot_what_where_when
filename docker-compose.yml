@@ -102,8 +102,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy       
-    command: sh -c "cd ./ && python -m alembic revision --autogenerate -m 'Add init table' && python -m alembic upgrade head && python main.py"
-    # command: sh -c "python -m alembic upgrade head && python main.py"
+    # command: sh -c "cd ./ && python -m alembic revision --autogenerate -m 'Add init table' && python -m alembic upgrade head && python main.py"
+    command: sh -c "python -m alembic upgrade head && python main.py"
     networks:
       - my-bridge    
       

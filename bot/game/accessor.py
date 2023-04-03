@@ -88,11 +88,12 @@ class GameAccessor(Database):
         result = (await self.bot.pgcli.select(query)).scalars().first()
         return result
     
-    async def check_user_session_captain(self, chat_id):
+    async def check_user_session_captain(self, chat_id, session_id):
         query = alselsect(SessionUsersModel).join(SessionsModel).where(
             and_(
                 SessionUsersModel.is_captain == True,
-                SessionsModel.id_chat == chat_id
+                SessionsModel.id_chat == chat_id,
+                SessionsModel.id == session_id
             )).options(joinedload(SessionUsersModel.users).options(joinedload(UsersModel.user_sessions))) \
             .options(joinedload(SessionUsersModel.sessions).options(joinedload(SessionsModel.user_sessions)))
 
